@@ -1,0 +1,33 @@
+{
+  "name": "seatbelt",
+  "version": "0.0.1",
+  "description": "A typescript server framework for nodejs",
+  "main": "index.js",
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "test": "test"
+  },
+  "keywords": [
+    "typescript",
+    "node",
+    "express",
+    "server"
+  ],
+  "author": "Thomas Meadows",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^7.0.8",
+    "rollup": "^0.41.5",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-local-resolve": "^1.0.7",
+    "rollup-plugin-node-resolve": "^2.0.0",
+    "rollup-plugin-typescript": "^0.8.1",
+    "tslint": "^4.5.1",
+    "tslint-eslint-rules": "^3.5.0",
+    "tslint-microsoft-contrib": "^4.0.1",
+    "typescript": "^2.2.1"
+  },
+  "dependencies": {
+    "cli-color": "^1.2.0"
+  }
+}
