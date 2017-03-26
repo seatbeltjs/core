@@ -16,7 +16,9 @@
   "author": "Thomas Meadows",
   "license": "ISC",
   "devDependencies": {
+    "@types/inquirer": "0.0.32",
     "@types/node": "^7.0.8",
+    "inquirer": "^3.0.6",
     "rollup": "^0.41.5",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-local-resolve": "^1.0.7",

@@ -3,6 +3,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var path = require('path');
+var fs = require('fs');
 
 var clc = require('cli-color');
 var error = clc.red.bold;
@@ -127,6 +128,103 @@ var Log = (function () {
     return Log;
 }());
 
+var inquirer = require('inquirer');
+var NewApp = (function () {
+    function NewApp(configFolder, configJson) {
+        this.log = new Log('Seatbelt-NewApp');
+        this.seatbeltJSON = {};
+        this.configFolder = configFolder;
+        this.configJson = configJson;
+    }
+    NewApp.prototype.init = function () {
+        var _this = this;
+        this.log.system('looks like this is your first time strapping your seatbelt, lets set up the framework');
+        return inquirer.prompt([
+            {
+                type: 'checkbox',
+                message: 'Deselect any set up options that you do not want to keep, then press [enter] to continue',
+                name: 'options',
+                choices: [
+                    {
+                        name: NewApp.EXAMPLE_HOME_ROUTE,
+                        checked: true
+                    },
+                    {
+                        name: NewApp.LOCAL_ENVIRONMENT_VARIABLES,
+                        checked: true
+                    },
+                    {
+                        name: NewApp.PACKAGE_JSON_SCRIPTS,
+                        checked: true
+                    },
+                    {
+                        name: NewApp.HELMET_JS_MIDDLEWARE,
+                        checked: true
+                    }
+                ]
+            }
+        ])
+            .then(function (answers) {
+            answers.options.forEach(function (option) {
+                switch (option) {
+                    case NewApp.EXAMPLE_HOME_ROUTE:
+                        _this.log.system('creating example home route');
+                        break;
+                    case NewApp.LOCAL_ENVIRONMENT_VARIABLES:
+                        _this.log.system('creating local environment variables');
+                        break;
+                    case NewApp.PACKAGE_JSON_SCRIPTS:
+                        _this.log.system('creating package json scripts');
+                        break;
+                    case NewApp.HELMET_JS_MIDDLEWARE:
+                        _this.log.system('creating helmet js middleware');
+                        break;
+                }
+            });
+            _this.log.system('creating json config');
+        });
+    };
+    return NewApp;
+}());
+NewApp.EXAMPLE_HOME_ROUTE = 'Example Home Route';
+NewApp.LOCAL_ENVIRONMENT_VARIABLES = 'Local Environmental Variables';
+NewApp.PACKAGE_JSON_SCRIPTS = 'package.json Scripts';
+NewApp.HELMET_JS_MIDDLEWARE = 'helmet.js middleware(for site security)';
+
+var TSImportCreator = (function () {
+    function TSImportCreator(path$$1) {
+        this.log = new Log('Seatbelt-TSImportCreator');
+        this.appPath = path$$1;
+    }
+    TSImportCreator.prototype.init = function () {
+        this.log.system('creating ts importer');
+    };
+    return TSImportCreator;
+}());
+
+var Rollup = (function () {
+    function Rollup(path$$1) {
+        this.log = new Log('Seatbelt-Rollup');
+        this.appPath = path$$1;
+    }
+    Rollup.prototype.init = function () {
+        this.log.system('rolling up files');
+    };
+    return Rollup;
+}());
+
+var BootApp = (function () {
+    function BootApp() {
+        this.log = new Log('Seatbelt-Startup');
+    }
+    BootApp.prototype.init = function () {
+        this.log.system('Booting App');
+    };
+    return BootApp;
+}());
+
+var CONFIG_FOLDER = '.seatbelt';
+var CONFIG_JSON = 'seatbelt.json';
 var caller = function () {
     return path.dirname(module.parent.parent.filename);
 };
@@ -141,81 +239,58 @@ var Seatbelt = (function () {
     Seatbelt.prototype.getRoot = function () {
         return this._root;
     };
+    Seatbelt.prototype._initConfig = function () {
+        var configFolder = path.join(this.getRoot(), CONFIG_FOLDER);
+        var configFolderExist = fs.existsSync(configFolder);
+        var configJson = path.join(configFolder, CONFIG_JSON);
+        var configJsonExist = fs.existsSync(path.join(this.getRoot(), CONFIG_FOLDER, CONFIG_JSON));
+        if (!configFolderExist && !configJsonExist) {
+            return new NewApp(path.join(this.getRoot(), CONFIG_FOLDER), CONFIG_JSON).init();
+        }
+    };
+    Seatbelt.prototype._bootApp = function () {
+        return new BootApp().init();
+    };
+    Seatbelt.prototype._createTSImporter = function () {
+        return new TSImportCreator(this.getRoot()).init();
+    };
+    Seatbelt.prototype._rollUpFiles = function () {
+        return new Rollup(this.getRoot()).init();
+    };
     Seatbelt.prototype.strap = function () {
+        var _this = this;
         this._setRoot(caller());
         this.log.system('▬▬▬▬(๑๑)▬▬▬▬ setbelt strapped to', this.getRoot());
+        this._initConfig()
+            .then(function () { return _this._createTSImporter(); })
+            .then(function () { return _this._rollUpFiles(); })
+            .then(function () { return _this._bootApp(); });
     };
     return Seatbelt;
 }());
 
-var Get = (function () {
-    function Get() {
-    }
-    Get.prototype.get = function () {
-        console.log('get strapped');
+function Route(config) {
+    return function (classToDecorate) {
     };
-    return Get;
-}());
+}
 
-var Post = (function () {
-    function Post() {
-    }
-    Post.prototype.post = function () {
-        console.log('post strapped');
+function Middleware(config) {
+    return function (classToDecorate) {
     };
-    return Post;
-}());
+}
 
-var Put = (function () {
-    function Put() {
-    }
-    Put.prototype.put = function () {
-        console.log('put strapped');
+function Policy(config) {
+    return function (classToDecorate) {
     };
-    return Put;
-}());
+}
 
-var Delete = (function () {
-    function Delete() {
-    }
-    Delete.prototype.strap = function () {
-        console.log('delete strapped');
+function Validator(config) {
+    return function (classToDecorate) {
     };
-    return Delete;
-}());
-
-var Middleware = (function () {
-    function Middleware() {
-    }
-    Middleware.prototype.middleware = function () {
-        console.log('middleware strapped');
-    };
-    return Middleware;
-}());
-
-var Policy = (function () {
-    function Policy() {
-    }
-    Policy.prototype.policy = function () {
-        console.log('policy strapped');
-    };
-    return Policy;
-}());
-
-var Validator = (function () {
-    function Validator() {
-    }
-    Validator.prototype.validator = function () {
-        console.log('validator strapped');
-    };
-    return Validator;
-}());
+}
 
 exports.Seatbelt = Seatbelt;
-exports.Get = Get;
-exports.Post = Post;
-exports.Put = Put;
-exports.Delete = Delete;
+exports.Route = Route;
 exports.Middleware = Middleware;
 exports.Policy = Policy;
 exports.Validator = Validator;

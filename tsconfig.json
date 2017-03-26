@@ -9,6 +9,7 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "inlineSources": true,
+    "experimentalDecorators": true,
     "types": [
       "body-parser",
       "compression",

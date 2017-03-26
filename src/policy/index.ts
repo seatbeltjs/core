@@ -1,9 +1,5 @@
-export interface IPolicy {
-  policy: any;
-}
+export function Policy(config: Object) {
+  return (classToDecorate: Object) => {
 
-export class Policy implements IPolicy {
-  public policy() {
-    console.log('policy strapped');
-  }
+  };
 }

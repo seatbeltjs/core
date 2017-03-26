@@ -1,9 +1,5 @@
-export interface IValidator {
-  validator: any;
-}
+export function Validator(config: Object) {
+  return (classToDecorate: Object) => {
 
-export class Validator implements IValidator {
-  public validator() {
-    console.log('validator strapped');
-  }
+  };
 }
