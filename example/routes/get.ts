@@ -5,7 +5,8 @@ import { Route } from '../../src';
   type: 'GET'
 })
 export class HomeRoute {
+  public hello: string = 'hi';
   public init(req: Object, res: Object) {
-
+    return 'worked';
   }
 }

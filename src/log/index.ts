@@ -1,4 +1,5 @@
 const clc = require('cli-color');
+const json = require('json-beautify');
 
 const error = clc.red.bold;
 const warn = clc.yellow.bold;
@@ -36,6 +37,9 @@ export class Log implements ILog {
   }
   private _type: string;
   private _zone: string;
+  private _json(jsonObject: Object) {
+    return json(jsonObject);
+  }
   public setType(type: string) {
     this._type = type;
   }
@@ -55,6 +59,9 @@ export class Log implements ILog {
   }
   private _log(...params: any[]) {
     params.forEach(param => {
+      if (typeof param === 'object') {
+        param = this._json(param);
+      }
       process.stdout.write(param);
       process.stdout.write(' ');
     });
