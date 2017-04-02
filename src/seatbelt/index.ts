@@ -28,31 +28,35 @@ export class Seatbelt implements ISeatbelt {
   public getRoot(): string {
     return this._root;
   }
-  private _initConfig() {
+  private _initConfig(cb: Function) {
     const configFolder = join(this.getRoot(), CONFIG_FOLDER);
     const configFolderExist = existsSync(configFolder);
     const configJson = join(configFolder, CONFIG_JSON);
     const configJsonExist = existsSync(join(this.getRoot(), CONFIG_FOLDER, CONFIG_JSON));
     if (!configFolderExist && !configJsonExist) {
-      return new NewApp(join(this.getRoot(), CONFIG_FOLDER), CONFIG_JSON).init();
+      return new NewApp(join(this.getRoot(), CONFIG_FOLDER), CONFIG_JSON).init()
+      .then(() => cb());
     }
+
+    return cb();
   }
   private _bootApp() {
-    return new BootApp().init();
+    return new BootApp(this.getRoot()).init();
   }
   private _createTSImporter() {
     return new TSImportCreator(this.getRoot()).init();
   }
-  private _rollUpFiles() {
-    return new Rollup(this.getRoot()).init();
+  private _rollUpFiles(cb: Function) {
+    return new Rollup(this.getRoot()).init(cb);
   }
   public strap() {
     this._setRoot(caller());
     this.log.system('▬▬▬▬(๑๑)▬▬▬▬ setbelt strapped to', this.getRoot());
-    this._createTSImporter();
-    // this._initConfig()
-    // .then(() => this._createTSImporter())
-    // .then(() => this._rollUpFiles())
-    // .then(() => this._bootApp());
+    this._initConfig(() => {
+      this._createTSImporter();
+      this._rollUpFiles(() => {
+        this._bootApp();
+      });
+    });
   }
 }

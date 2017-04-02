@@ -236,18 +236,67 @@ var Rollup = (function () {
         this.log = new Log('Seatbelt-Rollup');
         this.appPath = path$$1;
     }
-    Rollup.prototype.init = function () {
+    Rollup.prototype.init = function (cb) {
+        var _this = this;
         this.log.system('rolling up files');
+        this.seatbeltPath = path.join(this.appPath, '.seatbelt');
+        if (!fs.existsSync(this.seatbeltPath)) {
+            fs.mkdirSync(this.seatbeltPath);
+        }
+        
+        var rollup = require('rollup');
+        return rollup.rollup({
+            entry: this.seatbeltPath + '/imports.ts',
+            format: 'cjs',
+            plugins: [
+                require('rollup-plugin-node-resolve')({
+                    extensions: ['.ts', '.js', '.json']
+                }),
+                require('rollup-plugin-typescript')({
+                    typescript: require('typescript')
+                })
+            ],
+            dest: this.seatbeltPath + '/index.js'
+        })
+            .then(function (bundle) {
+            var result = bundle.generate({
+                format: 'cjs'
+            });
+            fs.writeFileSync(path.join(_this.seatbeltPath, 'index.js'), result.code);
+            return cb();
+        });
     };
     return Rollup;
 }());
 
+var express = require('express');
 var BootApp = (function () {
-    function BootApp() {
+    function BootApp(path$$1) {
         this.log = new Log('Seatbelt-Startup');
+        this.port = process.env.port || 3000;
+        this.appPath = path$$1;
     }
     BootApp.prototype.init = function () {
+        var _this = this;
         this.log.system('Booting App');
+        var allImports = require(path.join(this.appPath, '.seatbelt')).allImports;
+        var classesByType = {};
+        var importedClasses = allImports();
+        Object.keys(importedClasses).forEach(function (key) {
+            if (!classesByType[importedClasses[key].__seatbelt__]) {
+                classesByType[importedClasses[key].__seatbelt__] = [];
+            }
+            classesByType[importedClasses[key].__seatbelt__].push(importedClasses[key]);
+        });
+        this.app = express();
+        if (classesByType['route']) {
+            classesByType['route'].forEach(function (route) {
+                _this.app[route['__seatbelt_config__'].type.toLowerCase()](route['__seatbelt_config__'].path, route.init);
+            });
+        }
+        this.app.listen(this.port, function () {
+            _this.log.system("Example app listening on port " + _this.port + "!");
+        });
     };
     return BootApp;
 }());
@@ -268,28 +317,36 @@ var Seatbelt = (function () {
     Seatbelt.prototype.getRoot = function () {
         return this._root;
     };
-    Seatbelt.prototype._initConfig = function () {
+    Seatbelt.prototype._initConfig = function (cb) {
         var configFolder = path.join(this.getRoot(), CONFIG_FOLDER);
         var configFolderExist = fs.existsSync(configFolder);
         var configJson = path.join(configFolder, CONFIG_JSON);
         var configJsonExist = fs.existsSync(path.join(this.getRoot(), CONFIG_FOLDER, CONFIG_JSON));
         if (!configFolderExist && !configJsonExist) {
-            return new NewApp(path.join(this.getRoot(), CONFIG_FOLDER), CONFIG_JSON).init();
+            return new NewApp(path.join(this.getRoot(), CONFIG_FOLDER), CONFIG_JSON).init()
+                .then(function () { return cb(); });
         }
+        return cb();
     };
     Seatbelt.prototype._bootApp = function () {
-        return new BootApp().init();
+        return new BootApp(this.getRoot()).init();
     };
     Seatbelt.prototype._createTSImporter = function () {
         return new TSImportCreator(this.getRoot()).init();
     };
-    Seatbelt.prototype._rollUpFiles = function () {
-        return new Rollup(this.getRoot()).init();
+    Seatbelt.prototype._rollUpFiles = function (cb) {
+        return new Rollup(this.getRoot()).init(cb);
     };
     Seatbelt.prototype.strap = function () {
+        var _this = this;
         this._setRoot(caller());
         this.log.system('▬▬▬▬(๑๑)▬▬▬▬ setbelt strapped to', this.getRoot());
-        this._createTSImporter();
+        this._initConfig(function () {
+            _this._createTSImporter();
+            _this._rollUpFiles(function () {
+                _this._bootApp();
+            });
+        });
     };
     return Seatbelt;
 }());
@@ -297,14 +354,49 @@ var Seatbelt = (function () {
 function Route(config) {
     return function (originalClassConstructor) {
         var RouteConstructor = function () {
-            var newProto = originalClassConstructor.prototype;
-            newProto.__seatbelt__ = 'route';
-            newProto.__seatbelt_config__ = config;
-            return newProto;
+            originalClassConstructor.prototype.__seatbelt__ = 'route';
+            originalClassConstructor.prototype.__seatbelt_config__ = config;
+            return originalClassConstructor.prototype;
         };
         return RouteConstructor;
     };
 }
 
+function Middleware(config) {
+    return function (originalClassConstructor) {
+        var MiddlewareConstructor = function () {
+            originalClassConstructor.prototype.__seatbelt__ = 'middleware';
+            originalClassConstructor.prototype.__seatbelt_config__ = config;
+            return originalClassConstructor.prototype;
+        };
+        return MiddlewareConstructor;
+    };
+}
+
+function Policy(config) {
+    return function (originalClassConstructor) {
+        var PolicyConstructor = function () {
+            originalClassConstructor.prototype.__seatbelt__ = 'policy';
+            originalClassConstructor.prototype.__seatbelt_config__ = config;
+            return originalClassConstructor.prototype;
+        };
+        return PolicyConstructor;
+    };
+}
+
+function Validator(config) {
+    return function (originalClassConstructor) {
+        var ValidatorConstructor = function () {
+            originalClassConstructor.prototype.__seatbelt__ = 'validator';
+            originalClassConstructor.prototype.__seatbelt_config__ = config;
+            return originalClassConstructor.prototype;
+        };
+        return ValidatorConstructor;
+    };
+}
+
 exports.Seatbelt = Seatbelt;
 exports.Route = Route;
+exports.Middleware = Middleware;
+exports.Policy = Policy;
+exports.Validator = Validator;

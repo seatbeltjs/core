@@ -10,6 +10,7 @@
     "sourceMap": true,
     "inlineSources": true,
     "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
     "types": [
       "body-parser",
       "compression",
