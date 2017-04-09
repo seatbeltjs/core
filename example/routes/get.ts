@@ -6,7 +6,7 @@ import { Route } from '../../src';
 })
 export class HomeRoute {
   public hello: string = 'hi';
-  public init(req: any, res: any) {
+  public controller (req: any, res: any) {
     return res.send('worked');
   }
 }

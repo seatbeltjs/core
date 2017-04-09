@@ -28,9 +28,18 @@ export class BootApp {
 
     this.app = express();
 
+    if (classesByType['middleware']) {
+      classesByType['middleware'].sort((a: any, b: any) => (a.__seatbelt_config__.weight - b.__seatbelt_config__.weight));
+      classesByType['middleware'].forEach((middleware: any) => {
+        if (middleware.middleware && typeof middleware.middleware === 'function') {
+          this.app.use(middleware.middleware);
+        }
+      });
+    }
+
     if (classesByType['route']) {
       classesByType['route'].forEach((route: any) => {
-        this.app[route['__seatbelt_config__'].type.toLowerCase()](route['__seatbelt_config__'].path, route.init);
+        this.app[route['__seatbelt_config__'].type.toLowerCase()](route['__seatbelt_config__'].path, route.controller);
       });
     }
 

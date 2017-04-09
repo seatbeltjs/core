@@ -12,6 +12,6 @@ export function Route(config: IRouteConfig): any {
       return originalClassConstructor.prototype;
     };
 
-    return <typeof originalClassConstructor>RouteConstructor;
+    return RouteConstructor;
   };
 }

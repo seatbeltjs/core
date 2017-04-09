@@ -2,8 +2,15 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-var path = require('path');
-var fs = require('fs');
+require('path');
+require('fs');
+
+function __decorate(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
 
 var clc = require('cli-color');
 var json = require('json-beautify');
@@ -200,164 +207,8 @@ NewApp.PACKAGE_JSON_SCRIPTS = 'package.json Scripts';
 NewApp.HELMET_JS_MIDDLEWARE = 'helmet.js middleware(for site security)';
 
 var scanFolder = require('scan-folder');
-var TSImportCreator = (function () {
-    function TSImportCreator(path$$1) {
-        this.log = new Log('Seatbelt-TSImportCreator');
-        this.appPath = path$$1;
-    }
-    TSImportCreator.prototype._createImportsTS = function (files) {
-        var importTemplate = '';
-        var exportTemplate = 'const exportsObject = {};';
-        files.forEach(function (file, i) {
-            file = file.slice(0, -3);
-            importTemplate += "import * as Request" + i + " from '" + file + "';\n";
-            exportTemplate += "\nfor (let variable in Request" + i + ") {\n    if (Request" + i + " && Request" + i + "[variable] && Request" + i + "[variable].prototype) {\n        exportsObject[variable + '__" + i + "'] = new Request" + i + "[variable]();\n    }\n}\n";
-        });
-        var exportStatement = "\nexport function allImports() {\n  return exportsObject;\n}\n    ";
-        this.log.system();
-        this.seatbeltPath = path.join(this.appPath, '.seatbelt');
-        if (!fs.existsSync(this.seatbeltPath)) {
-            fs.mkdirSync(this.seatbeltPath);
-        }
-        
-        fs.writeFileSync(path.join(this.seatbeltPath, 'imports.ts'), importTemplate + exportTemplate + exportStatement);
-    };
-    TSImportCreator.prototype.init = function () {
-        this.log.system('creating ts importer');
-        var files = scanFolder(this.appPath, 'ts', true).filter(function (path$$1) { return path$$1.indexOf('/.seatbelt/') === -1; });
-        this.log.system('files found', files);
-        this._createImportsTS(files);
-    };
-    return TSImportCreator;
-}());
-
-var Rollup = (function () {
-    function Rollup(path$$1) {
-        this.log = new Log('Seatbelt-Rollup');
-        this.appPath = path$$1;
-    }
-    Rollup.prototype.init = function (cb) {
-        var _this = this;
-        this.log.system('rolling up files');
-        this.seatbeltPath = path.join(this.appPath, '.seatbelt');
-        if (!fs.existsSync(this.seatbeltPath)) {
-            fs.mkdirSync(this.seatbeltPath);
-        }
-        
-        var rollup = require('rollup');
-        return rollup.rollup({
-            entry: this.seatbeltPath + '/imports.ts',
-            format: 'cjs',
-            plugins: [
-                require('rollup-plugin-node-resolve')({
-                    extensions: ['.ts', '.js', '.json']
-                }),
-                require('rollup-plugin-typescript')({
-                    typescript: require('typescript')
-                })
-            ],
-            dest: this.seatbeltPath + '/index.js'
-        })
-            .then(function (bundle) {
-            var result = bundle.generate({
-                format: 'cjs'
-            });
-            fs.writeFileSync(path.join(_this.seatbeltPath, 'index.js'), result.code);
-            return cb();
-        });
-    };
-    return Rollup;
-}());
 
 var express = require('express');
-var BootApp = (function () {
-    function BootApp(path$$1) {
-        this.log = new Log('Seatbelt-Startup');
-        this.port = process.env.port || 3000;
-        this.appPath = path$$1;
-    }
-    BootApp.prototype.init = function () {
-        var _this = this;
-        this.log.system('Booting App');
-        var allImports = require(path.join(this.appPath, '.seatbelt')).allImports;
-        var classesByType = {};
-        var importedClasses = allImports();
-        Object.keys(importedClasses).forEach(function (key) {
-            if (!classesByType[importedClasses[key].__seatbelt__]) {
-                classesByType[importedClasses[key].__seatbelt__] = [];
-            }
-            classesByType[importedClasses[key].__seatbelt__].push(importedClasses[key]);
-        });
-        this.app = express();
-        if (classesByType['middleware']) {
-            classesByType['middleware'].sort(function (a, b) { return (a.__seatbelt_config__.weight - b.__seatbelt_config__.weight); });
-            classesByType['middleware'].forEach(function (middleware) {
-                if (middleware.middleware && typeof middleware.middleware === 'function') {
-                    _this.app.use(middleware.middleware);
-                }
-            });
-        }
-        if (classesByType['route']) {
-            classesByType['route'].forEach(function (route) {
-                _this.app[route['__seatbelt_config__'].type.toLowerCase()](route['__seatbelt_config__'].path, route.controller);
-            });
-        }
-        this.app.listen(this.port, function () {
-            _this.log.system("Example app listening on port " + _this.port + "!");
-        });
-    };
-    return BootApp;
-}());
-
-var CONFIG_FOLDER = '.seatbelt';
-var CONFIG_JSON = 'seatbelt.json';
-var caller = function () {
-    return path.dirname(module.parent.parent.filename);
-};
-var Seatbelt = (function () {
-    function Seatbelt() {
-        this.log = new Log('Seatbelt');
-        this._root = '';
-    }
-    Seatbelt.prototype._setRoot = function (root) {
-        this._root = root;
-    };
-    Seatbelt.prototype.getRoot = function () {
-        return this._root;
-    };
-    Seatbelt.prototype._initConfig = function (cb) {
-        var configFolder = path.join(this.getRoot(), CONFIG_FOLDER);
-        var configFolderExist = fs.existsSync(configFolder);
-        var configJson = path.join(configFolder, CONFIG_JSON);
-        var configJsonExist = fs.existsSync(path.join(this.getRoot(), CONFIG_FOLDER, CONFIG_JSON));
-        if (!configFolderExist && !configJsonExist) {
-            return new NewApp(path.join(this.getRoot(), CONFIG_FOLDER), CONFIG_JSON).init()
-                .then(function () { return cb(); });
-        }
-        return cb();
-    };
-    Seatbelt.prototype._bootApp = function () {
-        return new BootApp(this.getRoot()).init();
-    };
-    Seatbelt.prototype._createTSImporter = function () {
-        return new TSImportCreator(this.getRoot()).init();
-    };
-    Seatbelt.prototype._rollUpFiles = function (cb) {
-        return new Rollup(this.getRoot()).init(cb);
-    };
-    Seatbelt.prototype.strap = function () {
-        var _this = this;
-        this._setRoot(caller());
-        this.log.system('▬▬▬▬(๑๑)▬▬▬▬ setbelt strapped to', this.getRoot());
-        this._initConfig(function () {
-            _this._createTSImporter();
-            _this._rollUpFiles(function () {
-                _this._bootApp();
-            });
-        });
-    };
-    return Seatbelt;
-}());
 
 function Route(config) {
     return function (originalClassConstructor) {
@@ -382,30 +233,59 @@ function Middleware(config) {
     };
 }
 
-function Policy(config) {
-    return function (originalClassConstructor) {
-        var PolicyConstructor = function () {
-            originalClassConstructor.prototype.__seatbelt__ = 'policy';
-            originalClassConstructor.prototype.__seatbelt_config__ = config;
-            return originalClassConstructor.prototype;
-        };
-        return PolicyConstructor;
+var HelmetJSMiddleware = (function () {
+    function HelmetJSMiddleware() {
+        this.middleware = require('helmet')();
+    }
+    return HelmetJSMiddleware;
+}());
+HelmetJSMiddleware = __decorate([
+    Middleware({
+        weight: 1
+    })
+], HelmetJSMiddleware);
+
+
+var Request0 = Object.freeze({
+	get HelmetJSMiddleware () { return HelmetJSMiddleware; }
+});
+
+var HomeRoute = (function () {
+    function HomeRoute() {
+        this.hello = 'hi';
+    }
+    HomeRoute.prototype.controller = function (req, res) {
+        return res.send('worked');
     };
+    return HomeRoute;
+}());
+HomeRoute = __decorate([
+    Route({
+        path: '/',
+        type: 'GET'
+    })
+], HomeRoute);
+
+
+var Request1 = Object.freeze({
+	get HomeRoute () { return HomeRoute; }
+});
+
+const exportsObject = {};
+for (let variable in Request0) {
+    if (Request0 && Request0[variable] && Request0[variable].prototype) {
+        exportsObject[variable + '__0'] = new Request0[variable]();
+    }
 }
 
-function Validator(config) {
-    return function (originalClassConstructor) {
-        var ValidatorConstructor = function () {
-            originalClassConstructor.prototype.__seatbelt__ = 'validator';
-            originalClassConstructor.prototype.__seatbelt_config__ = config;
-            return originalClassConstructor.prototype;
-        };
-        return ValidatorConstructor;
-    };
+for (let variable in Request1) {
+    if (Request1 && Request1[variable] && Request1[variable].prototype) {
+        exportsObject[variable + '__1'] = new Request1[variable]();
+    }
 }
 
-exports.Seatbelt = Seatbelt;
-exports.Route = Route;
-exports.Middleware = Middleware;
-exports.Policy = Policy;
-exports.Validator = Validator;
+function allImports() {
+  return exportsObject;
+}
+
+exports.allImports = allImports;
