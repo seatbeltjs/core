@@ -299,7 +299,21 @@ var BootApp = (function () {
         }
         if (classesByType['route']) {
             classesByType['route'].forEach(function (route) {
-                _this.app[route['__seatbelt_config__'].type.toLowerCase()](route['__seatbelt_config__'].path, route.controller);
+                var policies = [];
+                if (Array.isArray(route.policies) && classesByType['policy']) {
+                    route.policies.forEach(function (routePolicyName) {
+                        classesByType['policy'].forEach(function (policy) {
+                            if (routePolicyName === policy.__name__) {
+                                policies.push(policy.policy);
+                            }
+                        });
+                    });
+                }
+                var policiesPlusController = policies.concat([
+                    route.controller
+                ]);
+                (_a = _this.app)[route['__seatbelt_config__'].type.toLowerCase()].apply(_a, [route['__seatbelt_config__'].path].concat(policiesPlusController));
+                var _a;
             });
         }
         this.app.listen(this.port, function () {
@@ -360,21 +374,20 @@ var Seatbelt = (function () {
 }());
 
 function Route(config) {
-    return function (originalClassConstructor) {
-        var RouteConstructor = function () {
-            originalClassConstructor.prototype.__seatbelt__ = 'route';
-            originalClassConstructor.prototype.__seatbelt_config__ = config;
-            return originalClassConstructor.prototype;
+    return function (OriginalClassConstructor) {
+        return function () {
+            var origin = new OriginalClassConstructor();
+            origin.__seatbelt_config__ = config;
+            origin.__seatbelt__ = 'route';
+            return origin;
         };
-        return RouteConstructor;
     };
 }
 
 function Middleware(config) {
-    return function (originalClassConstructor) {
+    return function (OriginalClassConstructor) {
         return function () {
-            var origin = new originalClassConstructor();
-            origin.prototype = originalClassConstructor.prototype;
+            var origin = new OriginalClassConstructor();
             origin.__seatbelt__ = 'middleware';
             origin.__seatbelt_config__ = config;
             return origin;
@@ -383,13 +396,18 @@ function Middleware(config) {
 }
 
 function Policy(config) {
-    return function (originalClassConstructor) {
-        var PolicyConstructor = function () {
-            originalClassConstructor.prototype.__seatbelt__ = 'policy';
-            originalClassConstructor.prototype.__seatbelt_config__ = config;
-            return originalClassConstructor.prototype;
+    return function (OriginalClassConstructor) {
+        return function () {
+            var origin = OriginalClassConstructor.prototype;
+            if (config && config.name) {
+                origin.__name__ = config.name;
+            }
+            else {
+                origin.__name__ = OriginalClassConstructor.name;
+            }
+            origin.__seatbelt__ = 'policy';
+            return OriginalClassConstructor.prototype;
         };
-        return PolicyConstructor;
     };
 }
 

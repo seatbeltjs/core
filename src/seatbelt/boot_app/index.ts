@@ -39,7 +39,22 @@ export class BootApp {
 
     if (classesByType['route']) {
       classesByType['route'].forEach((route: any) => {
-        this.app[route['__seatbelt_config__'].type.toLowerCase()](route['__seatbelt_config__'].path, route.controller);
+        const policies: any[] = [];
+        if (Array.isArray(route.policies) && classesByType['policy']) {
+          route.policies.forEach((routePolicyName: string) => {
+            classesByType['policy'].forEach((policy: any) => {
+              if (routePolicyName === policy.__name__) {
+                policies.push(policy.policy);
+              }
+            });
+          });
+        }
+
+        const policiesPlusController = [
+          ...policies,
+          route.controller
+        ];
+        this.app[route['__seatbelt_config__'].type.toLowerCase()](route['__seatbelt_config__'].path, ...policiesPlusController);
       });
     }
 

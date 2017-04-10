@@ -1,12 +1,19 @@
-export function Policy(config: Object) {
-  return (originalClassConstructor: Function) => {
+export interface IPolicyConfig {
+  name: string;
+}
 
-    const PolicyConstructor = function () {
-      originalClassConstructor.prototype.__seatbelt__ = 'policy';
-      originalClassConstructor.prototype.__seatbelt_config__ = config;
-      return originalClassConstructor.prototype;
+export function Policy(config?: IPolicyConfig): Function {
+  return (OriginalClassConstructor: any): any => {
+
+    return function () {
+      const origin = OriginalClassConstructor.prototype;
+      if (config && config.name) {
+        origin.__name__ = config.name;
+      } else {
+        origin.__name__ = OriginalClassConstructor.name;
+      }
+      origin.__seatbelt__ = 'policy';
+      return OriginalClassConstructor.prototype;
     };
-
-    return PolicyConstructor;
   };
 }

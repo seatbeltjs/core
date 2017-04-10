@@ -4,14 +4,13 @@ export interface IRouteConfig {
 }
 
 export function Route(config: IRouteConfig): any {
-  return function(originalClassConstructor: any) {
+  return function(OriginalClassConstructor: any) {
 
-    const RouteConstructor = function () {
-      originalClassConstructor.prototype.__seatbelt__ = 'route';
-      originalClassConstructor.prototype.__seatbelt_config__ = config;
-      return originalClassConstructor.prototype;
+    return function () {
+      const origin = new OriginalClassConstructor();
+      origin.__seatbelt_config__ = config;
+      origin.__seatbelt__ = 'route';
+      return origin;
     };
-
-    return RouteConstructor;
   };
 }
