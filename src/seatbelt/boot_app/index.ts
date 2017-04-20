@@ -31,7 +31,13 @@ export class BootApp {
     if (classesByType['middleware']) {
       classesByType['middleware'].sort((a: any, b: any) => (a.__seatbelt_config__.weight - b.__seatbelt_config__.weight));
       classesByType['middleware'].forEach((middleware: any) => {
-        if (middleware.middleware && typeof middleware.middleware === 'function') {
+        if (middleware.middleware && Array.isArray(middleware.middleware)) {
+          middleware.middleware.forEach((middleware: any) => {
+            if (typeof middleware === 'function') {
+              this.app.use(middleware);
+            }
+          });
+        } else if (middleware.middleware && typeof middleware.middleware === 'function') {
           this.app.use(middleware.middleware);
         }
       });

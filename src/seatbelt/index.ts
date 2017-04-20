@@ -52,11 +52,9 @@ export class Seatbelt implements ISeatbelt {
   public strap() {
     this._setRoot(caller());
     this.log.system('▬▬▬▬(๑๑)▬▬▬▬ setbelt strapped to', this.getRoot());
-    this._initConfig(() => {
-      this._createTSImporter();
-      this._rollUpFiles(() => {
-        this._bootApp();
-      });
+    this._createTSImporter();
+    this._rollUpFiles(() => {
+      this._bootApp();
     });
   }
 }

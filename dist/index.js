@@ -292,7 +292,14 @@ var BootApp = (function () {
         if (classesByType['middleware']) {
             classesByType['middleware'].sort(function (a, b) { return (a.__seatbelt_config__.weight - b.__seatbelt_config__.weight); });
             classesByType['middleware'].forEach(function (middleware) {
-                if (middleware.middleware && typeof middleware.middleware === 'function') {
+                if (middleware.middleware && Array.isArray(middleware.middleware)) {
+                    middleware.middleware.forEach(function (middleware) {
+                        if (typeof middleware === 'function') {
+                            _this.app.use(middleware);
+                        }
+                    });
+                }
+                else if (middleware.middleware && typeof middleware.middleware === 'function') {
                     _this.app.use(middleware.middleware);
                 }
             });
@@ -363,11 +370,9 @@ var Seatbelt = (function () {
         var _this = this;
         this._setRoot(caller());
         this.log.system('▬▬▬▬(๑๑)▬▬▬▬ setbelt strapped to', this.getRoot());
-        this._initConfig(function () {
-            _this._createTSImporter();
-            _this._rollUpFiles(function () {
-                _this._bootApp();
-            });
+        this._createTSImporter();
+        this._rollUpFiles(function () {
+            _this._bootApp();
         });
     };
     return Seatbelt;
@@ -411,19 +416,7 @@ function Policy(config) {
     };
 }
 
-function Validator(config) {
-    return function (originalClassConstructor) {
-        var ValidatorConstructor = function () {
-            originalClassConstructor.prototype.__seatbelt__ = 'validator';
-            originalClassConstructor.prototype.__seatbelt_config__ = config;
-            return originalClassConstructor.prototype;
-        };
-        return ValidatorConstructor;
-    };
-}
-
 exports.Seatbelt = Seatbelt;
 exports.Route = Route;
 exports.Middleware = Middleware;
 exports.Policy = Policy;
-exports.Validator = Validator;
