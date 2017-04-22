@@ -1,14 +1,13 @@
-import { Route } from '../../src';
+import { DRoute, IRoute } from '../../src';
 
-@Route({
+@DRoute({
   path: '/',
-  type: 'GET'
-})
-export class HomeRoute {
-  public hello: string = 'hi';
-  public policies: string[] = [
+  type: 'GET',
+  policies: [
     'LocalHost'
-  ];
+  ]
+})
+export class HomeRoute implements IRoute {
   public controller (req: any, res: any) {
     return res.send('worked');
   }

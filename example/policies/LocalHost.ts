@@ -1,7 +1,7 @@
-import { Policy } from '../../src';
+import { DPolicy, IPolicy } from '../../src';
 
-@Policy()
-export class LocalHost {
+@DPolicy()
+export class LocalHost implements IPolicy {
   public policy (req: any, res: any, next: any) {
     console.log('policy working');
     return next();

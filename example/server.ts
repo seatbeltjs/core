@@ -1,7 +1,7 @@
-import { DExpressServer, CExpressServer, IExpressServer } from '../src';
+import { DExpress, IServer } from '../src';
 
-@DExpressServer()
-export class Server implements IExpressServer {
+@DExpress()
+export class Server implements IServer {
   public middleware = [
     require('helmet')()
   ];

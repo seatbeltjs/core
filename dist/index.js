@@ -55,6 +55,7 @@ var Log = (function () {
             params[_i] = arguments[_i];
         }
         params.forEach(function (param) {
+            param = param.toString();
             if (typeof param === 'object') {
                 param = _this._json(param);
             }
@@ -206,6 +207,8 @@ var TSImportCreator = (function () {
         this.appPath = path$$1;
     }
     TSImportCreator.prototype._createImportsTS = function (files) {
+        this.seatbeltPath = path.join(this.appPath, '.seatbelt');
+        this.writePath = path.join(this.seatbeltPath, 'imports.ts');
         var importTemplate = '';
         var exportTemplate = 'const exportsObject = {};';
         files.forEach(function (file, i) {
@@ -214,13 +217,13 @@ var TSImportCreator = (function () {
             exportTemplate += "\nfor (let variable in Request" + i + ") {\n    if (Request" + i + " && Request" + i + "[variable] && Request" + i + "[variable].prototype) {\n        exportsObject[variable + '__" + i + "'] = new Request" + i + "[variable]();\n    }\n}\n";
         });
         var exportStatement = "\nexport function allImports() {\n  return exportsObject;\n}\n    ";
-        this.log.system();
-        this.seatbeltPath = path.join(this.appPath, '.seatbelt');
         if (!fs.existsSync(this.seatbeltPath)) {
             fs.mkdirSync(this.seatbeltPath);
         }
         
-        fs.writeFileSync(path.join(this.seatbeltPath, 'imports.ts'), importTemplate + exportTemplate + exportStatement);
+        var fullTemplate = importTemplate + exportTemplate + exportStatement;
+        this.log.system('writing to path', this.writePath, '' + fullTemplate.length);
+        fs.writeFileSync(this.writePath, fullTemplate);
     };
     TSImportCreator.prototype.init = function () {
         this.log.system('creating ts importer');
@@ -273,59 +276,33 @@ var express = require('express');
 var BootApp = (function () {
     function BootApp(path$$1) {
         this.log = new Log('Seatbelt-Startup');
-        this.port = process.env.port || 3000;
         this.appPath = path$$1;
     }
     BootApp.prototype.init = function () {
-        var _this = this;
         this.log.system('Booting App');
+        this.log.debug(path.join(this.appPath, '.seatbelt'));
         var allImports = require(path.join(this.appPath, '.seatbelt')).allImports;
         var classesByType = {};
+        var bootServer;
         var importedClasses = allImports();
         Object.keys(importedClasses).forEach(function (key) {
-            if (!classesByType[importedClasses[key].__seatbelt__]) {
-                classesByType[importedClasses[key].__seatbelt__] = [];
+            if (importedClasses[key].__seatbelt__ === 'server') {
+                bootServer = importedClasses[key];
             }
-            classesByType[importedClasses[key].__seatbelt__].push(importedClasses[key]);
+            else {
+                if (!classesByType[importedClasses[key].__seatbelt__]) {
+                    classesByType[importedClasses[key].__seatbelt__] = [];
+                }
+                classesByType[importedClasses[key].__seatbelt__].push(importedClasses[key]);
+            }
         });
-        this.app = express();
-        if (classesByType['middleware']) {
-            classesByType['middleware'].sort(function (a, b) { return (a.__seatbelt_config__.weight - b.__seatbelt_config__.weight); });
-            classesByType['middleware'].forEach(function (middleware) {
-                if (middleware.middleware && Array.isArray(middleware.middleware)) {
-                    middleware.middleware.forEach(function (middleware) {
-                        if (typeof middleware === 'function') {
-                            _this.app.use(middleware);
-                        }
-                    });
-                }
-                else if (middleware.middleware && typeof middleware.middleware === 'function') {
-                    _this.app.use(middleware.middleware);
-                }
-            });
+        if (bootServer) {
+            this.log.info('starting server');
+            this.server = bootServer.__seatbelt_strap__(classesByType);
         }
-        if (classesByType['route']) {
-            classesByType['route'].forEach(function (route) {
-                var policies = [];
-                if (Array.isArray(route.policies) && classesByType['policy']) {
-                    route.policies.forEach(function (routePolicyName) {
-                        classesByType['policy'].forEach(function (policy) {
-                            if (routePolicyName === policy.__name__) {
-                                policies.push(policy.policy);
-                            }
-                        });
-                    });
-                }
-                var policiesPlusController = policies.concat([
-                    route.controller
-                ]);
-                (_a = _this.app)[route['__seatbelt_config__'].type.toLowerCase()].apply(_a, [route['__seatbelt_config__'].path].concat(policiesPlusController));
-                var _a;
-            });
+        else {
+            this.log.error('CRITICAL: No Server Defined');
         }
-        this.app.listen(this.port, function () {
-            _this.log.system("Example app listening on port " + _this.port + "!");
-        });
     };
     return BootApp;
 }());
@@ -373,15 +350,28 @@ var Seatbelt = (function () {
         this._createTSImporter();
         this._rollUpFiles(function () {
             _this._bootApp();
-        });
+        })
+            .catch(function (err) { return _this.log.error(err); });
     };
     return Seatbelt;
 }());
 
-function Route(config) {
+function DRoute(config) {
     return function (OriginalClassConstructor) {
         return function () {
             var origin = new OriginalClassConstructor();
+            if (typeof config.type === 'string') {
+                config.type = [config.type];
+            }
+            if (typeof config.path === 'string') {
+                config.path = [config.path];
+            }
+            if (!config.policies) {
+                config.policies = [];
+            }
+            if (typeof config.policies === 'string') {
+                config.policies = [config.policies];
+            }
             origin.__seatbelt_config__ = config;
             origin.__seatbelt__ = 'route';
             return origin;
@@ -389,18 +379,7 @@ function Route(config) {
     };
 }
 
-function Middleware(config) {
-    return function (OriginalClassConstructor) {
-        return function () {
-            var origin = new OriginalClassConstructor();
-            origin.__seatbelt__ = 'middleware';
-            origin.__seatbelt_config__ = config;
-            return origin;
-        };
-    };
-}
-
-function Policy(config) {
+function DPolicy(config) {
     return function (OriginalClassConstructor) {
         return function () {
             var origin = OriginalClassConstructor.prototype;
@@ -416,7 +395,94 @@ function Policy(config) {
     };
 }
 
+function DExpress() {
+    return function (OriginalClassConstructor) {
+        return function () {
+            var origin = new OriginalClassConstructor();
+            origin.__seatbelt__ = 'server';
+            origin.__seatbelt_server__ = require('express');
+            origin.__seatbelt_strap__ = function (classesByType) {
+                var _this = this;
+                origin.express = require('express');
+                origin.app = origin.express();
+                origin.port = process.env.port || 3000;
+                origin.log = new Log('Express');
+                if (classesByType['route']) {
+                    classesByType['route'].forEach(function (route) {
+                        var policies = [];
+                        route.__seatbelt_config__.policies.forEach(function (routePolicyName) {
+                            classesByType['policy'].forEach(function (policy) {
+                                if (routePolicyName === policy.__name__) {
+                                    policies.push(policy.policy);
+                                }
+                            });
+                        });
+                        var policiesPlusController = policies.concat([
+                            route.controller
+                        ]);
+                        route['__seatbelt_config__'].type.forEach(function (eachType) {
+                            route['__seatbelt_config__'].path.forEach(function (eachPath) {
+                                (_a = _this.app)[eachType.toLowerCase()].apply(_a, [eachPath].concat(policiesPlusController));
+                                var _a;
+                            });
+                        });
+                    });
+                }
+                origin.app.listen(origin.port, function () {
+                    origin.log.system("Example app listening on port " + origin.port + "!");
+                });
+            };
+            return origin;
+        };
+    };
+}
+
+function DRestify() {
+    return function (OriginalClassConstructor) {
+        return function () {
+            var origin = new OriginalClassConstructor();
+            origin.__seatbelt__ = 'server';
+            origin.__seatbelt_server__ = require('restify');
+            origin.__seatbelt_strap__ = function (classes) {
+                console.log(classes);
+            };
+            return origin;
+        };
+    };
+}
+
+function DHapi() {
+    return function (OriginalClassConstructor) {
+        return function () {
+            var origin = new OriginalClassConstructor();
+            origin.__seatbelt__ = 'server';
+            origin.__seatbelt_server__ = require('hapi');
+            origin.__seatbelt_strap__ = function (classes) {
+                console.log(classes);
+            };
+            return origin;
+        };
+    };
+}
+
+function DKoa() {
+    return function (OriginalClassConstructor) {
+        return function () {
+            var origin = new OriginalClassConstructor();
+            origin.__seatbelt__ = 'server';
+            origin.__seatbelt_server__ = require('koa');
+            origin.__seatbelt_strap__ = function (classes) {
+                console.log(classes);
+            };
+            return origin;
+        };
+    };
+}
+
 exports.Seatbelt = Seatbelt;
-exports.Route = Route;
-exports.Middleware = Middleware;
-exports.Policy = Policy;
+exports.DRoute = DRoute;
+exports.DPolicy = DPolicy;
+exports.DExpress = DExpress;
+exports.DRestify = DRestify;
+exports.DKoa = DKoa;
+exports.DHapi = DHapi;

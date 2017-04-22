@@ -7,10 +7,13 @@ export class TSImportCreator {
   private log = new Log('Seatbelt-TSImportCreator');
   private appPath: string;
   private seatbeltPath: string;
+  private writePath: string;
   constructor(path: string) {
     this.appPath = path;
   }
   private _createImportsTS(files: string[]) {
+    this.seatbeltPath = join(this.appPath, '.seatbelt');
+    this.writePath = join(this.seatbeltPath, 'imports.ts');
     let importTemplate = '';
     let exportTemplate = 'const exportsObject = {};';
     files.forEach((file, i) => {
@@ -30,12 +33,12 @@ export function allImports() {
 }
     `;
 
-    this.log.system();
-    this.seatbeltPath = join(this.appPath, '.seatbelt');
     if (!existsSync(this.seatbeltPath)) {
       mkdirSync(this.seatbeltPath);
     };
-    writeFileSync(join(this.seatbeltPath, 'imports.ts'), importTemplate + exportTemplate + exportStatement);
+    const fullTemplate = importTemplate + exportTemplate + exportStatement;
+    this.log.system('writing to path', this.writePath, '' + fullTemplate.length);
+    writeFileSync(this.writePath, fullTemplate);
   }
   public init() {
     this.log.system('creating ts importer');

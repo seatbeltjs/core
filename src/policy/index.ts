@@ -2,7 +2,7 @@ export interface IPolicyConfig {
   name: string;
 }
 
-export function Policy(config?: IPolicyConfig): Function {
+export function DPolicy(config?: IPolicyConfig): Function {
   return (OriginalClassConstructor: any): any => {
 
     return function () {

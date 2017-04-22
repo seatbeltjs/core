@@ -59,6 +59,7 @@ export class Log implements ILog {
   }
   private _log(...params: any[]) {
     params.forEach(param => {
+      param = param.toString();
       if (typeof param === 'object') {
         param = this._json(param);
       }

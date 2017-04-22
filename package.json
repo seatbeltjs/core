@@ -33,7 +33,10 @@
     "@types/express": "^4.0.35",
     "cli-color": "^1.2.0",
     "express": "^4.15.2",
+    "hapi": "^16.1.1",
     "json-beautify": "^1.0.1",
+    "koa": "^2.2.0",
+    "restify": "^4.3.0",
     "scan-folder": "^1.0.0"
   }
 }

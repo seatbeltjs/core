@@ -1,8 +1,4 @@
-export {
-  CExpressServer,
-  DExpressServer,
-  IExpressServer
-} from './express';
-export { RestifyServer } from './restify';
-export { HapiServer } from './hapi';
-export { KoaServer } from './koa';
+export { DExpress } from './express';
+export { DRestify } from './restify';
+export { DHapi } from './hapi';
+export { DKoa } from './koa';
