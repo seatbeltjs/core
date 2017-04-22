@@ -1,11 +1,25 @@
-export function ExpressServer(): any {
+export interface PublicFolder {
+  publicPath: string;
+  pathOnSystem: string;
+}
+
+export interface IExpressServer {
+  favicon?: string;
+  publicFolders?: PublicFolder|PublicFolder[];
+  port?: number;
+  middleware?: Function[];
+  app?: (app: any) => {};
+}
+
+export class CExpressServer {
+}
+
+export function DExpressServer(): any {
   return function(OriginalClassConstructor: any) {
 
-    return function () {
-      const origin = new OriginalClassConstructor();
-      origin.__seatbelt__ = 'server';
-      origin.__seatbelt_server__ = 'express';
-      return origin;
-    };
+    OriginalClassConstructor();
+    this.__seatbelt__ = 'server';
+    this.__seatbelt_server__ = 'express';
+    return this;
   };
 }
