@@ -2,8 +2,8 @@ import { DPolicy, IPolicy } from '../../src';
 
 @DPolicy()
 export class LocalHost implements IPolicy {
-  public policy (req: any, res: any, next: any) {
+  public controller (route: any) {
     console.log('policy working');
-    return next();
+    return route.next();
   }
 }

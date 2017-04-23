@@ -19,6 +19,7 @@
     "@types/node": "^7.0.8",
     "helmet": "^3.5.0",
     "inquirer": "^3.0.6",
+    "koa-router": "^7.1.1",
     "rollup": "^0.41.5",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-local-resolve": "^1.0.7",

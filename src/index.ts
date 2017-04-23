@@ -15,11 +15,11 @@ export {
 } from './servers';
 
 export interface IPolicy {
-  policy: (req: any, res: any, next: any) => {};
+  controller: (route: any) => {};
 }
 
 export interface IRoute {
-  controller: (req: any, res: any) => {};
+  controller: (route: any) => {};
 }
 
 export interface PublicFolder {

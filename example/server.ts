@@ -1,8 +1,4 @@
-import { DExpress, IServer } from '../src';
+import { DRestify, IServer } from '../src';
 
-@DExpress()
-export class Server implements IServer {
-  public middleware = [
-    require('helmet')()
-  ];
-}
+@DRestify()
+export class Server implements IServer {}

@@ -8,7 +8,7 @@ import { DRoute, IRoute } from '../../src';
   ]
 })
 export class HomeRoute implements IRoute {
-  public controller (req: any, res: any) {
-    return res.send('worked');
+  public controller (route: any) {
+    return route.reply(JSON.stringify(Object.keys(route)));
   }
 }
