@@ -20,7 +20,16 @@ export function DHapi(): any {
             return controllerFunctions[i]({
               req,
               reply,
-              next: () => nextWrapper(++i)
+              next: () => nextWrapper(++i),
+              params: Object.assign(
+                {},
+                typeof req.params === 'object' ? req.params : {},
+                typeof req.body === 'object' ? req.body : {}
+                ,
+                typeof req.payload === 'object' ? req.payload : {}
+                ,
+                typeof req.query === 'object' ? req.query : {}
+              )
             });
           };
           nextWrapper(0);

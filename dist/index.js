@@ -351,6 +351,7 @@ function DPolicy(config) {
     };
 }
 
+const bodyParser = require('body-parser');
 function DExpress() {
     return function (OriginalClassConstructor) {
         return function () {
@@ -361,12 +362,14 @@ function DExpress() {
                 origin.app = origin.express();
                 origin.port = process.env.port || 3000;
                 origin.log = new Log('Express');
+                origin.app.use(bodyParser.json());
                 origin.__controller_wrapper__ = function (controllerFunction, req, res, next) {
                     controllerFunction({
                         req,
                         res,
                         next,
-                        reply: (...params) => res.send(...params)
+                        reply: (...params) => res.send(...params),
+                        params: Object.assign({}, typeof req.params === 'object' ? req.params : {}, typeof req.body === 'object' ? req.body : {}, typeof req.query === 'object' ? req.query : {})
                     });
                 };
                 if (classesByType['route']) {
@@ -409,12 +412,15 @@ function DRestify() {
                 origin.app = origin.restify.createServer();
                 origin.port = process.env.port || 3000;
                 origin.log = new Log('Express');
+                origin.app.use(origin.restify.bodyParser());
+                origin.app.use(origin.restify.queryParser());
                 origin.__controller_wrapper__ = function (controllerFunction, req, res, next) {
                     controllerFunction({
                         req,
                         res,
                         next,
-                        reply: (...params) => res.send(...params)
+                        reply: (...params) => res.send(...params),
+                        params: Object.assign({}, typeof req.query === 'object' ? req.query : {}, typeof req.params === 'object' ? req.params : {}, typeof req.body === 'object' ? req.body : {})
                     });
                 };
                 if (classesByType['route']) {
@@ -464,7 +470,8 @@ function DHapi() {
                         return controllerFunctions[i]({
                             req,
                             reply,
-                            next: () => nextWrapper(++i)
+                            next: () => nextWrapper(++i),
+                            params: Object.assign({}, typeof req.params === 'object' ? req.params : {}, typeof req.body === 'object' ? req.body : {}, typeof req.payload === 'object' ? req.payload : {}, typeof req.query === 'object' ? req.query : {})
                         });
                     };
                     nextWrapper(0);
@@ -507,6 +514,7 @@ function DHapi() {
     };
 }
 
+const body = require('koa-json-body');
 function DKoa() {
     return function (OriginalClassConstructor) {
         return function () {
@@ -519,12 +527,15 @@ function DKoa() {
                 this.port = process.env.port || 3000;
                 this.log = new Log('Express');
                 this.router = require('koa-router')();
+                this.app.use(body({ limit: '10kb', fallback: true }));
                 origin.__controller_wrapper__ = function (controllerFunction, ctx, next) {
+                    console.log(JSON.stringify(ctx.request));
                     controllerFunction(Object.assign(ctx, {
                         next,
                         reply: (response) => {
                             ctx.body = response;
-                        }
+                        },
+                        params: Object.assign({}, typeof ctx.req.params === 'object' ? ctx.req.params : {}, typeof ctx.request.body === 'object' ? ctx.request.body : {}, typeof ctx.request.query === 'object' ? ctx.request.query : {})
                     }));
                 };
                 if (classesByType['route']) {
@@ -555,6 +566,24 @@ function DKoa() {
     };
 }
 
+const Joi = require('joi');
+function DValidateRequest(requiredParams) {
+    return function (hostClass, functionName, functionAttributes) {
+        const originalMethod = functionAttributes.value;
+        functionAttributes.value = (route) => {
+            console.log('decorator called', requiredParams.isJoi);
+            Joi.validate(route.params, requiredParams, (err) => {
+                if (!err) {
+                    return originalMethod(route);
+                }
+                else {
+                    route.reply(err);
+                }
+            });
+        };
+    };
+}
+
 exports.Seatbelt = Seatbelt;
 exports.DRoute = DRoute;
 exports.DPolicy = DPolicy;
@@ -562,3 +591,4 @@ exports.DExpress = DExpress;
 exports.DRestify = DRestify;
 exports.DKoa = DKoa;
 exports.DHapi = DHapi;
+exports.DValidateRequest = DValidateRequest;

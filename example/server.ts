@@ -1,4 +1,5 @@
-import { DRestify, IServer } from '../src';
+import { DKoa, IServer } from '../src';
 
-@DRestify()
-export class Server implements IServer {}
+@DKoa()
+export class Server implements IServer {
+}

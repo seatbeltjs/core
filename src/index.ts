@@ -13,6 +13,9 @@ export {
   DKoa,
   DHapi
 } from './servers';
+export {
+  DValidateRequest
+} from './validate';
 
 export interface IPolicy {
   controller: (route: any) => {};

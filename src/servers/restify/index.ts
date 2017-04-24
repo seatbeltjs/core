@@ -11,12 +11,20 @@ export function DRestify(): any {
         origin.app = origin.restify.createServer();
         origin.port = process.env.port || 3000;
         origin.log = new Log('Express');
+        origin.app.use(origin.restify.bodyParser());
+        origin.app.use(origin.restify.queryParser());
         origin.__controller_wrapper__ = function (controllerFunction: Function, req: any, res: any, next: Function) {
           controllerFunction({
             req,
             res,
             next,
-            reply: (...params: any[]) => res.send(...params)
+            reply: (...params: any[]) => res.send(...params),
+            params: Object.assign(
+              {},
+              typeof req.query === 'object' ? req.query : {},
+              typeof req.params === 'object' ? req.params : {},
+              typeof req.body === 'object' ? req.body : {}
+            )
           });
         };
 
@@ -42,7 +50,6 @@ export function DRestify(): any {
             });
           });
         }
-
         origin.app.listen(origin.port);
       };
       return origin;

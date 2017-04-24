@@ -1,4 +1,5 @@
 import { Log } from '../../log';
+const bodyParser = require('body-parser');
 
 export function DExpress(): any {
   return function(OriginalClassConstructor: any) {
@@ -11,12 +12,20 @@ export function DExpress(): any {
         origin.app = origin.express();
         origin.port = process.env.port || 3000;
         origin.log = new Log('Express');
+        origin.app.use(bodyParser.json());
         origin.__controller_wrapper__ = function (controllerFunction: Function, req: any, res: any, next: Function) {
           controllerFunction({
             req,
             res,
             next,
-            reply: (...params: any[]) => res.send(...params)
+            reply: (...params: any[]) => res.send(...params),
+            params: Object.assign(
+              {},
+              typeof req.params === 'object' ? req.params : {},
+              typeof req.body === 'object' ? req.body : {}
+              ,
+              typeof req.query === 'object' ? req.query : {}
+            )
           });
         };
 
