@@ -12,15 +12,7 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "types": [
-      "body-parser",
-      "compression",
-      "cookie-parser",
-      "express",
-      "express-serve-static-core",
-      "mime",
-      "node",
-      "serve-static",
-      "hammerjs"
+      "node"
     ]
   },
   "exclude": [

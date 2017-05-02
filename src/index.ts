@@ -7,12 +7,7 @@ export {
 export {
   DPolicy
 } from './policy';
-export {
-  DExpress,
-  DRestify,
-  DKoa,
-  DHapi
-} from './servers';
+
 export {
   DValidateRequest
 } from './validate';

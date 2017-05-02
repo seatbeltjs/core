@@ -15,15 +15,17 @@ export class TSImportCreator {
     this.seatbeltPath = join(this.appPath, '.seatbelt');
     this.writePath = join(this.seatbeltPath, 'imports.ts');
     let importTemplate = '';
-    let exportTemplate = 'const exportsObject = {};';
+    let exportTemplate = '\nconst exportsObject = {};\n';
     files.forEach((file, i) => {
       file = file.slice(0, -3);
       importTemplate += `import * as Request${i} from '${file}';\n`;
       exportTemplate += `
-for (let variable in Request${i}) {
-    if (Request${i} && Request${i}[variable] && Request${i}[variable].prototype) {
-        exportsObject[variable + '__${i}'] = new Request${i}[variable]();
+if (Request${i} && typeof Request${i} === 'object') {
+  Object.keys(Request${i}).forEach(variable => {
+    if (Request${i}[variable] && Request${i}[variable].prototype) {
+      exportsObject[variable + '__${i}'] = new Request${i}[variable]();
     }
+  });
 }
 `;
     });
@@ -31,11 +33,11 @@ for (let variable in Request${i}) {
 export function allImports() {
   return exportsObject;
 }
-    `;
+`;
 
     if (!existsSync(this.seatbeltPath)) {
       mkdirSync(this.seatbeltPath);
-    };
+    }
     const fullTemplate = importTemplate + exportTemplate + exportStatement;
     this.log.system('writing to path', this.writePath, '' + fullTemplate.length);
     writeFileSync(this.writePath, fullTemplate);
@@ -46,4 +48,4 @@ export function allImports() {
     this.log.system('files found', files);
     this._createImportsTS(files);
   }
-};
+}

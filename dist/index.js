@@ -162,15 +162,17 @@ class TSImportCreator {
         this.seatbeltPath = path.join(this.appPath, '.seatbelt');
         this.writePath = path.join(this.seatbeltPath, 'imports.ts');
         let importTemplate = '';
-        let exportTemplate = 'const exportsObject = {};';
+        let exportTemplate = '\nconst exportsObject = {};\n';
         files.forEach((file, i) => {
             file = file.slice(0, -3);
             importTemplate += `import * as Request${i} from '${file}';\n`;
             exportTemplate += `
-for (let variable in Request${i}) {
-    if (Request${i} && Request${i}[variable] && Request${i}[variable].prototype) {
-        exportsObject[variable + '__${i}'] = new Request${i}[variable]();
+if (Request${i} && typeof Request${i} === 'object') {
+  Object.keys(Request${i}).forEach(variable => {
+    if (Request${i}[variable] && Request${i}[variable].prototype) {
+      exportsObject[variable + '__${i}'] = new Request${i}[variable]();
     }
+  });
 }
 `;
         });
@@ -178,11 +180,10 @@ for (let variable in Request${i}) {
 export function allImports() {
   return exportsObject;
 }
-    `;
+`;
         if (!fs.existsSync(this.seatbeltPath)) {
             fs.mkdirSync(this.seatbeltPath);
         }
-        
         const fullTemplate = importTemplate + exportTemplate + exportStatement;
         this.log.system('writing to path', this.writePath, '' + fullTemplate.length);
         fs.writeFileSync(this.writePath, fullTemplate);
@@ -201,12 +202,11 @@ class Rollup {
         this.appPath = path$$1;
     }
     init(cb) {
-        this.log.system('rolling up files');
         this.seatbeltPath = path.join(this.appPath, '.seatbelt');
+        this.log.system('rolling up files to path', this.seatbeltPath);
         if (!fs.existsSync(this.seatbeltPath)) {
             fs.mkdirSync(this.seatbeltPath);
         }
-        
         const rollup = require('rollup');
         return rollup.rollup({
             entry: this.seatbeltPath + '/imports.ts',
@@ -219,19 +219,35 @@ class Rollup {
                     typescript: require('typescript')
                 })
             ],
+            onwarn: (loc, frame, message) => {
+                console.log('warning');
+                if (loc) {
+                    console.warn(`${loc.file} (${loc.line}:${loc.column}) ${message}`);
+                    if (frame) {
+                        console.warn(frame);
+                    }
+                }
+                else {
+                    console.warn(message);
+                }
+            },
             dest: this.seatbeltPath + '/index.js'
         })
             .then((bundle) => {
+            this.log.system('rollup bundle created', bundle);
             const result = bundle.generate({
                 format: 'cjs'
             });
+            this.log.system('writing rollup bundle', path.join(this.seatbeltPath, 'index.js'), result.code.length);
             fs.writeFileSync(path.join(this.seatbeltPath, 'index.js'), result.code);
             return cb();
+        })
+            .catch((err) => {
+            this.log.error('error with rollup', err.stack);
         });
     }
 }
 
-const express = require('express');
 class BootApp {
     constructor(path$$1) {
         this.log = new Log('Seatbelt-Startup');
@@ -267,7 +283,7 @@ class BootApp {
 
 const CONFIG_FOLDER = '.seatbelt';
 const CONFIG_JSON = 'seatbelt.json';
-const caller = () => {
+const callerName = () => {
     return path.dirname(module.parent.parent.filename);
 };
 class Seatbelt {
@@ -302,7 +318,7 @@ class Seatbelt {
         return new Rollup(this.getRoot()).init(cb);
     }
     strap() {
-        this._setRoot(caller());
+        this._setRoot(callerName());
         this.log.system('▬▬▬▬(๑๑)▬▬▬▬ setbelt strapped to', this.getRoot());
         this._createTSImporter();
         this._rollUpFiles(() => {
@@ -351,221 +367,6 @@ function DPolicy(config) {
     };
 }
 
-const bodyParser = require('body-parser');
-function DExpress() {
-    return function (OriginalClassConstructor) {
-        return function () {
-            const origin = new OriginalClassConstructor();
-            origin.__seatbelt__ = 'server';
-            origin.__seatbelt_strap__ = function (classesByType) {
-                origin.express = require('express');
-                origin.app = origin.express();
-                origin.port = process.env.port || 3000;
-                origin.log = new Log('Express');
-                origin.app.use(bodyParser.json());
-                origin.__controller_wrapper__ = function (controllerFunction, req, res, next) {
-                    controllerFunction({
-                        req,
-                        res,
-                        next,
-                        reply: (...params) => res.send(...params),
-                        params: Object.assign({}, typeof req.params === 'object' ? req.params : {}, typeof req.body === 'object' ? req.body : {}, typeof req.query === 'object' ? req.query : {})
-                    });
-                };
-                if (classesByType['route']) {
-                    classesByType['route'].forEach((route) => {
-                        const policies = [];
-                        route.__seatbelt_config__.policies.forEach((routePolicyName) => {
-                            classesByType['policy'].forEach((policy) => {
-                                if (routePolicyName === policy.__name__) {
-                                    policies.push((req, res, next) => origin.__controller_wrapper__(policy.controller, req, res, next));
-                                }
-                            });
-                        });
-                        const policiesPlusController = [
-                            ...policies,
-                            (req, res, next) => origin.__controller_wrapper__(route.controller, req, res, next)
-                        ];
-                        route['__seatbelt_config__'].type.forEach((eachType) => {
-                            route['__seatbelt_config__'].path.forEach((eachPath) => {
-                                origin.app[eachType.toLowerCase()](eachPath, ...policiesPlusController);
-                            });
-                        });
-                    });
-                }
-                origin.app.listen(origin.port, () => {
-                    origin.log.system(`Example app listening on port ${origin.port}!`);
-                });
-            };
-            return origin;
-        };
-    };
-}
-
-function DRestify() {
-    return function (OriginalClassConstructor) {
-        return function () {
-            const origin = new OriginalClassConstructor();
-            origin.__seatbelt__ = 'server';
-            origin.__seatbelt_strap__ = function (classesByType) {
-                origin.restify = require('restify');
-                origin.app = origin.restify.createServer();
-                origin.port = process.env.port || 3000;
-                origin.log = new Log('Express');
-                origin.app.use(origin.restify.bodyParser());
-                origin.app.use(origin.restify.queryParser());
-                origin.__controller_wrapper__ = function (controllerFunction, req, res, next) {
-                    controllerFunction({
-                        req,
-                        res,
-                        next,
-                        reply: (...params) => res.send(...params),
-                        params: Object.assign({}, typeof req.query === 'object' ? req.query : {}, typeof req.params === 'object' ? req.params : {}, typeof req.body === 'object' ? req.body : {})
-                    });
-                };
-                if (classesByType['route']) {
-                    classesByType['route'].forEach((route) => {
-                        const policies = [];
-                        route.__seatbelt_config__.policies.forEach((routePolicyName) => {
-                            classesByType['policy'].forEach((policy) => {
-                                if (routePolicyName === policy.__name__) {
-                                    policies.push((req, res, next) => origin.__controller_wrapper__(policy.controller, req, res, next));
-                                }
-                            });
-                        });
-                        const policiesPlusController = [
-                            ...policies,
-                            (req, res, next) => origin.__controller_wrapper__(route.controller, req, res, next)
-                        ];
-                        route['__seatbelt_config__'].type.forEach((eachType) => {
-                            route['__seatbelt_config__'].path.forEach((eachPath) => {
-                                origin.app[eachType.toLowerCase()](eachPath, ...policiesPlusController);
-                            });
-                        });
-                    });
-                }
-                origin.app.listen(origin.port);
-            };
-            return origin;
-        };
-    };
-}
-
-function DHapi() {
-    return function (OriginalClassConstructor) {
-        return function () {
-            const origin = new OriginalClassConstructor();
-            origin.__seatbelt__ = 'server';
-            origin.__seatbelt_strap__ = function (classesByType) {
-                this.log = new Log('Hapi');
-                this.hapi = require('hapi');
-                this.app = new this.hapi.Server();
-                this.port = process.env.port || 3000;
-                this.log = new Log('Express');
-                this.__controller_wrapper__ = function (controllerFunctions, req, reply) {
-                    const nextWrapper = (i) => {
-                        if (!controllerFunctions[i]) {
-                            return reply({ status: 'request failed' }).code(500);
-                        }
-                        return controllerFunctions[i]({
-                            req,
-                            reply,
-                            next: () => nextWrapper(++i),
-                            params: Object.assign({}, typeof req.params === 'object' ? req.params : {}, typeof req.body === 'object' ? req.body : {}, typeof req.payload === 'object' ? req.payload : {}, typeof req.query === 'object' ? req.query : {})
-                        });
-                    };
-                    nextWrapper(0);
-                };
-                this.app.connection({ port: this.port });
-                if (classesByType['route']) {
-                    classesByType['route'].forEach((route) => {
-                        const policies = [];
-                        route.__seatbelt_config__.policies.forEach((routePolicyName) => {
-                            classesByType['policy'].forEach((policy) => {
-                                if (routePolicyName === policy.__name__) {
-                                    policies.push(policy.controller);
-                                }
-                            });
-                        });
-                        const policiesPlusController = [
-                            ...policies,
-                            route.controller
-                        ];
-                        route['__seatbelt_config__'].type.forEach((eachType) => {
-                            route['__seatbelt_config__'].path.forEach((eachPath) => {
-                                this.app.route({
-                                    method: eachType.toLowerCase(),
-                                    path: eachPath,
-                                    handler: (request, reply) => origin.__controller_wrapper__(policiesPlusController, request, reply)
-                                });
-                            });
-                        });
-                    });
-                }
-                this.app.start((err) => {
-                    if (err) {
-                        throw err;
-                    }
-                    this.log.system(`Server running at: ${this.app.info.uri}`);
-                });
-            };
-            return origin;
-        };
-    };
-}
-
-const body = require('koa-json-body');
-function DKoa() {
-    return function (OriginalClassConstructor) {
-        return function () {
-            const origin = new OriginalClassConstructor();
-            origin.__seatbelt__ = 'server';
-            origin.__seatbelt_strap__ = function (classesByType) {
-                this.log = new Log('Koa');
-                this.Koa = require('koa');
-                this.app = new this.Koa();
-                this.port = process.env.port || 3000;
-                this.log = new Log('Express');
-                this.router = require('koa-router')();
-                this.app.use(body({ limit: '10kb', fallback: true }));
-                origin.__controller_wrapper__ = function (controllerFunction, ctx, next) {
-                    console.log(JSON.stringify(ctx.request));
-                    controllerFunction(Object.assign(ctx, {
-                        next,
-                        reply: (response) => {
-                            ctx.body = response;
-                        },
-                        params: Object.assign({}, typeof ctx.req.params === 'object' ? ctx.req.params : {}, typeof ctx.request.body === 'object' ? ctx.request.body : {}, typeof ctx.request.query === 'object' ? ctx.request.query : {})
-                    }));
-                };
-                if (classesByType['route']) {
-                    classesByType['route'].forEach((route) => {
-                        const policies = [];
-                        route.__seatbelt_config__.policies.forEach((routePolicyName) => {
-                            classesByType['policy'].forEach((policy) => {
-                                if (routePolicyName === policy.__name__) {
-                                    policies.push(policy);
-                                }
-                            });
-                        });
-                        route['__seatbelt_config__'].type.forEach((eachType) => {
-                            route['__seatbelt_config__'].path.forEach((eachPath) => {
-                                policies.forEach(policy => {
-                                    this.router[eachType.toLowerCase()](eachPath, (ctx, next) => origin.__controller_wrapper__(policy.controller, ctx, next));
-                                });
-                                this.router[eachType.toLowerCase()](eachPath, (ctx, next) => origin.__controller_wrapper__(route.controller, ctx, next));
-                            });
-                        });
-                    });
-                }
-                this.app.use(this.router.routes());
-                this.app.listen(this.port);
-            };
-            return origin;
-        };
-    };
-}
-
 const Joi = require('joi');
 function DValidateRequest(requiredParams) {
     return function (hostClass, functionName, functionAttributes) {
@@ -587,8 +388,4 @@ function DValidateRequest(requiredParams) {
 exports.Seatbelt = Seatbelt;
 exports.DRoute = DRoute;
 exports.DPolicy = DPolicy;
-exports.DExpress = DExpress;
-exports.DRestify = DRestify;
-exports.DKoa = DKoa;
-exports.DHapi = DHapi;
 exports.DValidateRequest = DValidateRequest;

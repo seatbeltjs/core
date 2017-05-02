@@ -1,8 +1,5 @@
 import { Log } from '../../log';
-import { Express } from 'express';
 import { join } from 'path';
-
-const express = require('express');
 
 export class BootApp {
   private log = new Log('Seatbelt-Startup');
@@ -24,7 +21,7 @@ export class BootApp {
       if (importedClasses[key].__seatbelt__ === 'server') {
         bootServer = <any>importedClasses[key];
       } else {
-        if (!classesByType[importedClasses[key].__seatbelt__]) {
+        if (!<any>classesByType[importedClasses[key].__seatbelt__]) {
           classesByType[importedClasses[key].__seatbelt__] = [];
         }
         classesByType[importedClasses[key].__seatbelt__].push(importedClasses[key]);

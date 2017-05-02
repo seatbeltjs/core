@@ -14,7 +14,7 @@ export interface ISeatbelt {
   getRoot(): string;
 }
 
-const caller = (): string => {
+const callerName = (): string => {
   return dirname(module.parent.parent.filename);
 };
 
@@ -50,7 +50,7 @@ export class Seatbelt implements ISeatbelt {
     return new Rollup(this.getRoot()).init(cb);
   }
   public strap() {
-    this._setRoot(caller());
+    this._setRoot(callerName());
     this.log.system('▬▬▬▬(๑๑)▬▬▬▬ setbelt strapped to', this.getRoot());
     this._createTSImporter();
     this._rollUpFiles(() => {
