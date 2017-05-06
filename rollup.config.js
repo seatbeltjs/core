@@ -3,7 +3,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import typescript from 'rollup-plugin-typescript';
 
 export default {
-  entry: 'src/index.ts',
+  entry: 'lib/index.ts',
   format: 'cjs',
   plugins: [
     resolve({
@@ -13,5 +13,5 @@ export default {
       typescript: require('typescript')
     })
   ],
-  dest: 'dist/index.js'
+  dest: 'dist/core.js'
 };

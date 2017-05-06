@@ -1,22 +1,21 @@
-const clc = require('cli-color');
+const chalk = require('chalk');
 const json = require('json-beautify');
 
-const error = clc.red.bold;
-const warn = clc.yellow.bold;
-const debug = clc.blue;
-const verbose = clc.cyan;
-const info = clc.cyan;
-const system = clc.yellow;
+const error = (...params: string[]) => chalk.red.bold(...params);
+const warn = (...params: string[]) => chalk.yellow.bold(...params);
+const debug = (...params: string[]) => chalk.blue(...params);
+const verbose = (...params: string[]) => chalk.cyan(...params);
+const info = (...params: string[]) => chalk.cyan(...params);
+const system = (...params: string[]) => chalk.yellow(...params);
 const silly = () => {
   return '[' +
-    clc.yellow('S') +
-    clc.red('I') +
-    clc.green('L') +
-    clc.blue('L') +
-    clc.yellow('Y') +
+    chalk.yellow('S') +
+    chalk.red('I') +
+    chalk.green('L') +
+    chalk.blue('L') +
+    chalk.yellow('Y') +
     ']';
 };
-
 export interface ILog {
   error(...params: any[]): void;
   err(...params: any[]): void;
@@ -47,21 +46,24 @@ export class Log implements ILog {
     this._zone = zone;
   }
   public getType(): string {
-    return clc.cyan('{' + this._type + '}');
+    return chalk.cyan('{' + this._type + '}\n');
   }
   public getZone(): string {
     if (this._zone) {
-      return clc.yellow('(' + this._zone + ')');
+      return chalk.yellow('(' + this._zone + ')');
     } else {
       return '';
     }
-
   }
+  private _c = console;
   private _log(...params: any[]) {
     params.forEach(param => {
       param = param.toString();
       if (typeof param === 'object') {
         param = this._json(param);
+      }
+      if (typeof param === 'function') {
+        param = param.toString();
       }
       process.stdout.write(param);
       process.stdout.write(' ');

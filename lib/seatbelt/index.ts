@@ -55,7 +55,6 @@ export class Seatbelt implements ISeatbelt {
     this._createTSImporter();
     this._rollUpFiles(() => {
       this._bootApp();
-    })
-    .catch((err: Error) => this.log.error(err));
+    });
   }
 }
