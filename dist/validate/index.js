@@ -4,18 +4,17 @@ const Joi = require('joi');
 function DValidateRequest(requiredParams) {
     return function (hostClass, functionName, functionAttributes) {
         const originalMethod = functionAttributes.value;
-        functionAttributes.value = (route) => {
+        functionAttributes.value = (controller, serverController) => {
             console.log('decorator called', requiredParams.isJoi);
-            Joi.validate(route.params, requiredParams, (err) => {
+            Joi.validate(controller.params, requiredParams, (err) => {
                 if (!err) {
-                    return originalMethod(route);
+                    return originalMethod(controller, serverController);
                 }
                 else {
-                    route.reply(err);
+                    controller.send({ status: 400, json: err });
                 }
             });
         };
     };
 }
 exports.DValidateRequest = DValidateRequest;
-;

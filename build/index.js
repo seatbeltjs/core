@@ -162,6 +162,22 @@ class TSImportCreator {
         this.log = new Log('Seatbelt-TSImportCreator');
         this.appPath = path$$1;
     }
+    _createRollupConfig() {
+        const rollupConfigPath = path.join(this.seatbeltPath, 'rollupconfig.js');
+        const rollupTemplate = `import typescript from 'rollup-plugin-typescript';
+
+export default {
+  format: 'cjs',
+  plugins: [
+    typescript({
+      typescript: require('typescript')
+    })
+  ]
+};
+`;
+        this.log.system('writing rollup config at path ', rollupConfigPath, rollupTemplate.length);
+        fs.writeFileSync(rollupConfigPath, rollupTemplate);
+    }
     _createImportsTS(files) {
         this.seatbeltPath = path.join(this.appPath, '.seatbelt');
         this.writePath = path.join(this.seatbeltPath, 'imports.ts');
@@ -191,6 +207,7 @@ export function allImports() {
         const fullTemplate = importTemplate + exportTemplate + exportStatement;
         this.log.system('writing to path', this.writePath, '' + fullTemplate.length);
         fs.writeFileSync(this.writePath, fullTemplate);
+        this._createRollupConfig();
     }
     init() {
         this.log.system('creating ts importer');
@@ -353,14 +370,13 @@ const Joi = require('joi');
 function DValidateRequest(requiredParams) {
     return function (hostClass, functionName, functionAttributes) {
         const originalMethod = functionAttributes.value;
-        functionAttributes.value = (route) => {
-            console.log('decorator called', requiredParams.isJoi);
-            Joi.validate(route.params, requiredParams, (err) => {
+        functionAttributes.value = (controller, serverController) => {
+            Joi.validate(controller.params, Joi.object().keys(requiredParams), (err) => {
                 if (!err) {
-                    return originalMethod(route);
+                    return originalMethod(controller, serverController);
                 }
                 else {
-                    route.reply(err);
+                    controller.send({ status: 400, json: err });
                 }
             });
         };

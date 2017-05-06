@@ -13,5 +13,5 @@ export default {
       typescript: require('typescript')
     })
   ],
-  dest: 'dist/core.js'
+  dest: 'build/index.js'
 };
