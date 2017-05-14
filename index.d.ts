@@ -1,28 +1,21 @@
-/// <reference types="node" />
 export * from './lib/index';
-
-export declare interface ISend {
-  status?: number;
-  json: any;
+export interface ISend {
+    status?: number;
+    json: any;
 }
-
-export declare interface IController {
-  params: any;
-  send (sendInterface: ISend): void;
+export interface IController {
+    params: any;
+    send(sendInterface: ISend): void;
 }
-
-export declare interface IPolicyController extends IController {
-  next (): void;
+export interface IPolicyController extends IController {
+    next(): void;
 }
-
-export declare interface IRoute {
-  controller (controls: IController): any;
+export interface IRoute {
+    controller(controls: IController): any;
 }
-
-export declare interface IPolicy {
-  controller (controls: IPolicyController): any;
+export interface IPolicy {
+    controller(controls: IPolicyController): any;
 }
-
-export declare interface IServer {
-  port?: number;
+export interface IServer {
+    port?: number;
 }

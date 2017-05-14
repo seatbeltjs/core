@@ -8,6 +8,7 @@
     "moduleResolution": "node",
     "sourceMap": false,
     "inlineSources": false,
+    "noImplicitUseStrict": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "types": [
