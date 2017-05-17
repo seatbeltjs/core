@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "A typescript server framework for nodejs",
   "main": "./lib/index.js",
+  "types": "./index.d.ts",
   "scripts": {
     "build": "rollup -c ./rollup.config.js"
   },
@@ -12,7 +13,6 @@
     "express",
     "server"
   ],
-  "types": "./index.d.ts",
   "author": "Thomas Meadows",
   "license": "ISC",
   "devDependencies": {

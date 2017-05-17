@@ -1,11 +1,11 @@
-export declare type IConstructor = new () => {
+export declare type IPolicyConstructor = new () => {
   controller: Function;
 };
 
 const policyRegister: any = {};
 
 export function DPolicy(policyNames?: string|string[]): Function {
-  return (OriginalClassConstructor: IConstructor, wrappedName: any, valueObject: any): any => {
+  return (OriginalClassConstructor: IPolicyConstructor, wrappedName: any, valueObject: any): any => {
     if (typeof OriginalClassConstructor === 'function') {
       return class extends OriginalClassConstructor {
         public __seatbelt__: string;
@@ -25,9 +25,9 @@ export function DPolicy(policyNames?: string|string[]): Function {
         policyNames.forEach(policyName => {
           policyName = policyName.toLowerCase();
           const originalFunction = valueObject.value;
-          valueObject.value = function(controls: any, ...params: any[]) {
+          valueObject.value = function (controls: any, ...params: any[]) {
             const next = () => {
-              return originalFunction(controls, ...params);
+              return originalFunction.apply(this, [controls, ...params]);
             };
             const policyControls: any = Object.assign({}, controls, { next });
             return policyRegister[policyName](policyControls, ...params);

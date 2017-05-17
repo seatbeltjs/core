@@ -1,6 +1,3 @@
-export {
-  DRoute
-} from './route';
-export {
-  DPolicy
-} from './policy';
+export * from './route';
+export * from './policy';
+export * from './service';
