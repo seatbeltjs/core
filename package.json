@@ -16,6 +16,7 @@
   "author": "Thomas Meadows",
   "license": "ISC",
   "devDependencies": {
+    "@types/chalk": "^0.4.31",
     "@types/node": "^7.0.15",
     "rollup": "^0.41.6",
     "rollup-plugin-babel": "^2.7.1",
@@ -27,7 +28,7 @@
     "typescript": "^2.3.2"
   },
   "dependencies": {
-    "@seatbelt/boot": "^0.0.1",
-    "rxjs": "^5.4.0"
+    "chalk": "^1.1.3",
+    "json-beautify": "^1.0.1"
   }
 }
