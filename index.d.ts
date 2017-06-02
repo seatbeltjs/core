@@ -1,4 +1,5 @@
-export * from './lib/index';
+export * from './lib';
+export * from './boot';
 export interface ISend {
     status?: number;
     json: any;

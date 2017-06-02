@@ -6,26 +6,26 @@ export interface IRouteConfig {
 
 export function DRoute(config: IRouteConfig): any {
   return function(OriginalClassConstructor: new () => {}) {
-    return class extends OriginalClassConstructor {
-      public __seatbelt_config__: IRouteConfig;
-      public __seatbelt__: string;
+    class Route extends OriginalClassConstructor {
+      public __seatbelt_config__: IRouteConfig = config;
+      public name: string = OriginalClassConstructor.name;
+      public __seatbelt__: string = 'route';
       constructor() {
         super();
-        if (typeof config.type === 'string') {
-          config.type = [config.type];
+        if (typeof this.__seatbelt_config__.type === 'string') {
+          this.__seatbelt_config__.type = [this.__seatbelt_config__.type];
         }
-        if (typeof config.path === 'string') {
-          config.path = [config.path];
+        if (typeof this.__seatbelt_config__.path === 'string') {
+          this.__seatbelt_config__.path = [this.__seatbelt_config__.path];
         }
-        if (!config.policies) {
-          config.policies = [];
+        if (!this.__seatbelt_config__.policies) {
+          this.__seatbelt_config__.policies = [];
         }
-        if (typeof config.policies === 'string') {
-          config.policies = [config.policies];
+        if (typeof this.__seatbelt_config__.policies === 'string') {
+          this.__seatbelt_config__.policies = [this.__seatbelt_config__.policies];
         }
-        this.__seatbelt_config__ = config;
-        this.__seatbelt__ = 'route';
       }
-    };
+    }
+    return Route;
   };
 }

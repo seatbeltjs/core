@@ -7,16 +7,16 @@ const policyRegister: any = {};
 export function DPolicy(policyNames?: string|string[]): Function {
   return (OriginalClassConstructor: IPolicyConstructor, wrappedName: any, valueObject: any): any => {
     if (typeof OriginalClassConstructor === 'function') {
-      return class extends OriginalClassConstructor {
-        public __seatbelt__: string;
-        public __name__: string;
+      class Policy extends OriginalClassConstructor {
+        public __seatbelt__: string = 'policy';
+        public __name__: string = OriginalClassConstructor.name;
+        public name: string = OriginalClassConstructor.name;
         constructor() {
           super();
-          this.__name__ = OriginalClassConstructor.name;
-          this.__seatbelt__ = 'policy';
           policyRegister[OriginalClassConstructor.name.toLowerCase()] = this.controller;
         };
-      };
+      }
+      return Policy;
     } else if (valueObject && typeof valueObject.value === 'function') {
       if (typeof policyNames === 'string') {
         policyNames = [policyNames];

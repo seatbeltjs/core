@@ -1,5 +1,6 @@
 /// <reference types="node" />
-export * from './lib/index';
+export * from './lib';
+export * from './boot';
 
 export declare interface ISend {
   status?: number;
