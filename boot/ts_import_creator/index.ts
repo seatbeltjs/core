@@ -28,6 +28,12 @@ export default {
     this.log.system('writing rollup config at path ', rollupConfigPath, rollupTemplate.length);
     writeFileSync(rollupConfigPath, rollupTemplate);
   }
+  private _createPath() {
+    this.seatbeltPath = join(this.appPath, '.seatbelt');
+    if (!existsSync(this.seatbeltPath)) {
+      mkdirSync(this.seatbeltPath);
+    }
+  }
   private _createImportsTS(files: string[]) {
     this.seatbeltPath = join(this.appPath, '.seatbelt');
     let exportTemplate = '';
@@ -38,9 +44,8 @@ export default {
     writeFileSync(join(this.seatbeltPath, 'index.ts'), exportTemplate);
   };
   private _createServerTS(files: string[]) {
-  this.seatbeltPath = join(this.appPath, '.seatbelt');
-  this.writePath = join(this.seatbeltPath, 'server.ts');
-  let template = `import * as Request from './index';
+    this.writePath = join(this.seatbeltPath, 'server.ts');
+    let template = `import * as Request from './index';
 
 class Seatbelt {
   constructor() {
@@ -86,9 +91,6 @@ const seatbelt = new Seatbelt();
 seatbelt.server.__seatbelt_server_init__();
 `;
 
-    if (!existsSync(this.seatbeltPath)) {
-      mkdirSync(this.seatbeltPath);
-    }
     this.log.system('writing to path', this.writePath, '' + template.length);
     writeFileSync(this.writePath, template);
     this._createRollupConfig();
@@ -97,6 +99,7 @@ seatbelt.server.__seatbelt_server_init__();
     this.log.system('creating ts importer');
     const files = scanFolder(this.appPath, 'ts', true).filter((path: string) => path.indexOf('/.seatbelt/') === -1);
     this.log.system('files found', files);
+    this._createPath();
     this._createImportsTS(files);
     this._createServerTS(files);
   }

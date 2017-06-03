@@ -5,6 +5,7 @@ export declare class TSImportCreator {
     private writePath;
     constructor(path: string);
     private _createRollupConfig();
+    private _createPath();
     private _createImportsTS(files);
     private _createServerTS(files);
     init(): void;
