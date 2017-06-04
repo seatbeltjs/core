@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Services &mdash; Seatbelt 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Seatbelt 0.0.1 documentation" href="../index.html"/>
+        <link rel="up" title="Usage" href="../usage.html"/>
+        <link rel="next" title="License" href="../license.html"/>
+        <link rel="prev" title="Servers" href="servers.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Seatbelt
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Install</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../usage.html">Usage</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="models.html">Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#waterline">Waterline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#initialized-waterline-orm-plugin">Initialized waterline ORM plugin</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#create-model-in-waterline">Create Model In Waterline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#access-models-from-waterline-from-a-route-or-service">Access Models From Waterline from a route or service</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="policies.html">Policies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="policies.html#creating-a-policy">Creating a Policy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="policies.html#using-a-policy">Using a Policy</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="routes.html">Routes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="routes.html#creating-a-route">Creating a Route</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="servers.html">Servers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="servers.html#restify">Restify</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="servers.html#install">Install</a></li>
+<li class="toctree-l4"><a class="reference internal" href="servers.html#usage">Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="servers.html#express">Express</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="servers.html#id1">Install</a></li>
+<li class="toctree-l4"><a class="reference internal" href="servers.html#id2">Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="servers.html#hapi">Hapi</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="servers.html#id3">Install</a></li>
+<li class="toctree-l4"><a class="reference internal" href="servers.html#id4">Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="servers.html#koa">Koa</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="servers.html#id5">Install</a></li>
+<li class="toctree-l4"><a class="reference internal" href="servers.html#id6">Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Services</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-service">Creating a Service</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-services">Using Services</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#from-a-route">From a Route</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#from-another-service">From another Service</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Seatbelt</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../usage.html">Usage</a> &raquo;</li>
+        
+      <li>Services</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/usage/services.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="services">
+<h1>Services<a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="creating-a-service">
+<h2>Creating a Service<a class="headerlink" href="#creating-a-service" title="Permalink to this headline">¶</a></h2>
+<p>Services can be created from any folder in your project.</p>
+<div class="highlight-typescript"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="p">{</span> <span class="nx">DService</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;@seatbelt/core&#39;</span><span class="p">;</span>
+
+<span class="kd">@DService</span><span class="p">()</span>
+<span class="kr">export</span> <span class="kr">class</span> <span class="nx">Poke</span> <span class="p">{</span>
+  <span class="kr">public</span> <span class="nx">poke() {</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;poke&#39;</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="using-services">
+<h2>Using Services<a class="headerlink" href="#using-services" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="from-a-route">
+<h3>From a Route<a class="headerlink" href="#from-a-route" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-typescript"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="p">{</span> <span class="nx">DService</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;@seatbelt/core&#39;</span><span class="p">;</span>
+
+<span class="kd">@DService</span><span class="p">()</span> <span class="kr">public</span> <span class="nx">services</span>: <span class="kt">any</span><span class="p">;</span>
+<span class="kr">public</span> <span class="nx">controller</span> <span class="p">(</span><span class="nx">controller</span>: <span class="kt">any</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">services</span><span class="p">.</span><span class="nx">Poke</span><span class="p">.</span><span class="nx">poke</span><span class="p">();</span>
+  <span class="k">return</span> <span class="nx">controller</span><span class="p">.</span><span class="nx">send</span><span class="p">({</span> <span class="nx">status</span>: <span class="kt">200</span><span class="p">,</span> <span class="nx">json</span>: <span class="kt">controller</span> <span class="p">});</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="from-another-service">
+<h3>From another Service<a class="headerlink" href="#from-another-service" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-typescript"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="p">{</span> <span class="nx">DService</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;@seatbelt/core&#39;</span><span class="p">;</span>
+
+<span class="kd">@DService</span><span class="p">()</span>
+<span class="kr">export</span> <span class="kr">class</span> <span class="nx">NewService</span> <span class="p">{</span>
+  <span class="kd">@DService</span><span class="p">()</span> <span class="kr">public</span> <span class="nx">services</span>: <span class="kt">any</span><span class="p">;</span>
+  <span class="kr">public</span> <span class="nx">hi() {</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">services</span><span class="p">.</span><span class="nx">Poke</span><span class="p">.</span><span class="nx">poke</span><span class="p">();</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;hi&#39;</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../license.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="servers.html" class="btn btn-neutral" title="Servers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Thomas Meadows.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

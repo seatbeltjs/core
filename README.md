@@ -3,5 +3,8 @@
 # Seatbelt
 A typescript nodejs & typescript framework for making web servers
 
+## Basic Installation and Usage
+[Seatbelt.js.org](https://seatbelt.js.org)
+
 ### Documentation
 [ReadTheDocs](https://seatbelt.readthedocs.io/en/latest/)
