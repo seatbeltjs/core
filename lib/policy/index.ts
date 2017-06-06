@@ -1,3 +1,5 @@
+import { DRegisterPlugin } from '../';
+
 export declare type IPolicyConstructor = new () => {
   controller: Function;
 };
@@ -7,9 +9,10 @@ const policyRegister: any = {};
 export function DPolicy(policyNames?: string|string[]): Function {
   return (OriginalClassConstructor: IPolicyConstructor, wrappedName: any, valueObject: any): any => {
     if (typeof OriginalClassConstructor === 'function') {
+      @DRegisterPlugin({
+        pluginName: 'policy'
+      })
       class Policy extends OriginalClassConstructor {
-        public __seatbelt__: string = 'policy';
-        public __name__: string = OriginalClassConstructor.name;
         public name: string = OriginalClassConstructor.name;
         constructor() {
           super();

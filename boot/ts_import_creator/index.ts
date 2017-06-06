@@ -50,27 +50,40 @@ export default {
 class Seatbelt {
   constructor() {
 
+    const hooks = [];
+    const pluginNames = [];
+
     if (Request && typeof Request === 'object') {
       Object.keys(Request).forEach(variable => {
         if (Request[variable] && Request[variable].prototype) {
           const newItem = new Request[variable]();
-          if (newItem.__seatbelt__ === 'server') {
+          if (newItem.__seatbelt_plugin_name__ === 'server') {
             this.server = newItem;
-          } else if (newItem.__seatbelt__) {
-            if (!this[newItem.__seatbelt__]) {
-              this[newItem.__seatbelt__] = [];
+          } else if (newItem.__seatbelt_plugin_name__ && typeof newItem.__seatbelt_plugin_name__ === 'string') {
+            if (!this[newItem.__seatbelt_plugin_name__]) {
+              this[newItem.__seatbelt_plugin_name__] = [];
+              pluginNames.push(newItem.__seatbelt_plugin_name__);
+              if (newItem.__seatbelt_hook__ && typeof newItem.__seatbelt_hook__ === 'function') {
+                hooks.push(newItem.__seatbelt_hook__);
+              }
             }
-            this[newItem.__seatbelt__].push(newItem);
+            this[newItem.__seatbelt_plugin_name__].push(newItem);
           }
         }
       });
     }
 
+    hooks.forEach(hook => {
+      hook(this);
+    });
+
     if (this.server && this.server.plugins && Array.isArray(this.server.plugins)) {
       this.server.plugins.forEach(plugin => {
-        if (plugin.routes && typeof plugin.routes === typeof (() => {})) {
-          plugin.routes(this.route);
-        }
+        pluginNames.forEach(pluginName => {
+          if (plugin[pluginName] && typeof plugin[pluginName] === typeof (() => {})) {
+            plugin[pluginName](this[pluginName]);
+          }
+        });
       });
     }
 

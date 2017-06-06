@@ -1,15 +1,38 @@
+import { DRegisterPlugin } from '../';
+
+declare type IServiceConstructor = new () => {
+  __seatbelt_plugin_name__: string;
+};
+
 const serviceRegister: any = {};
 
-export function DService(): Function {
-  return (OriginalClassConstructor: any, wrappedName: any, valueObject: any): any => {
+export function DService(serviceName?: string): Function {
+  return (OriginalClassConstructor: IServiceConstructor, wrappedName?: string, valueObject?: any): any => {
     if (typeof OriginalClassConstructor === 'function') {
-      const origin = new OriginalClassConstructor();
-      origin.__name__ = OriginalClassConstructor.name;
-      origin.__seatbelt__ = 'service';
-      serviceRegister[OriginalClassConstructor.name] = origin;
-      return origin;
-    } else {
-      OriginalClassConstructor[wrappedName] = serviceRegister;
+      @DRegisterPlugin({
+        pluginName: 'service',
+        hook: function(seatbelt: any) {
+          Object.keys(seatbelt).forEach((key: string) => {
+            if (Array.isArray(seatbelt[key])) {
+              seatbelt[key].forEach((plugin: any) => {
+                if (typeof plugin === 'object') {
+                  console.log('>>>', plugin.name);
+                  Object.keys(plugin).forEach((pluginKey: string) => {
+                    console.log(pluginKey);
+                  })
+                }
+              });
+            }
+          });
+        }
+      })
+      class Service extends OriginalClassConstructor {
+        public name: string = OriginalClassConstructor.name;
+        constructor() {
+          super();
+        }
+      }
+      return Service;
     }
   };
 }

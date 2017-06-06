@@ -1,3 +1,5 @@
+import { DRegisterPlugin } from '../';
+
 export interface IRouteConfig {
   type: string|string[];
   path: string|string[];
@@ -6,10 +8,12 @@ export interface IRouteConfig {
 
 export function DRoute(config: IRouteConfig): any {
   return function(OriginalClassConstructor: new () => {}) {
+    @DRegisterPlugin({
+      pluginName: 'route'
+    })
     class Route extends OriginalClassConstructor {
       public __seatbelt_config__: IRouteConfig = config;
       public name: string = OriginalClassConstructor.name;
-      public __seatbelt__: string = 'route';
       constructor() {
         super();
         if (typeof this.__seatbelt_config__.type === 'string') {

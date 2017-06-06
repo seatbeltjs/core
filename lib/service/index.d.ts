@@ -1,1 +1,1 @@
-export declare function DService(): Function;
+export declare function DService(serviceName?: string): Function;

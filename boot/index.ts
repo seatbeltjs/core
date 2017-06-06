@@ -1,7 +1,6 @@
 import { dirname, join } from 'path';
 import { existsSync } from 'fs';
 import { Log } from '../';
-import { NewApp } from './new_app';
 import { TSImportCreator } from './ts_import_creator';
 import { Rollup } from './rollup';
 import { BootApp } from './boot_app';
