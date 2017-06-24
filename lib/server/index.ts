@@ -1,43 +1,57 @@
 import { Log } from '../log';
+import { isPropertyDecorator, PropertyDecorator, ClassDecorator } from '../../helpers';
 
 declare type IServerRegisterConstructor = new () => {
-  __seatbelt_plugin_name__: string;
+  __seatbeltPlugin: string;
 };
 
-export interface IServerRequest {
-  allParams: any;
-}
+export namespace Server {
+  export declare type Init = () => any;
+  export declare type Config = (routes: any[]) => any;
 
-export interface IServerResponse {
-  send: (status: number, body: any) => any;
-}
+  export interface Request {
+    allParams: Object;
+  }
 
-export interface IServerSeatbeltConfig {
-  type: string[];
-  path: string[];
-}
+  export interface Response {
+    send: (status: number, body: Object) => any;
+  }
 
-export interface IServerRoute {
-  controller: (request: IServerRequest, response: IServerResponse, server: any) => any;
-  __seatbelt_config__: IServerSeatbeltConfig;
-}
+  export interface BaseServer {
+    port: number;
+    server: Object;
+    log: Log;
+    conformServerControllerToSeatbeltController: Function;
+    init: Init;
+    config: Config;
+  }
 
-export function DServerRegister(): Function {
-  return (OriginalClassConstructor: IServerRegisterConstructor): any => {
-    if (typeof OriginalClassConstructor === 'function') {
+  export interface RouteConfig {
+    type: string[];
+    path: string[];
+  }
+
+  export interface Route {
+    __seatbeltConfig: RouteConfig;
+    controller: (request: Request, response: Response, server: Object) => any;
+  }
+
+  export function Register(): ClassDecorator {
+    return (OriginalClassConstructor: IServerRegisterConstructor): any => {
+      if (isPropertyDecorator(OriginalClassConstructor)) {
+        const log = new Log('ServerRegister');
+        return log.system('server wrapper cannot be used as a property wrapper');
+      }
       class ServerRegister extends OriginalClassConstructor {
-        public log: Log = new Log('ServerRegister');
+        public __seatbeltPlugin: string = 'server';
+        public __log: Log = new Log('ServerRegister');
         public name: string = OriginalClassConstructor.name;
-        public __seatbelt_plugin_name__: string = 'server';
         constructor() {
           super();
-          this.log.system('registering server');
+          this.__log.system('registering server => ', this.name);
         }
       }
       return ServerRegister;
-    } else {
-      const log = new Log('ServerRegister');
-      log.system('server wrapper cannot be used as a property wrapper');
-    }
-  };
+    };
+  }
 }

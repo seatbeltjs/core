@@ -16,7 +16,7 @@ export function DRegisterPlugin(pluginConfig: IPluginConfig): Function {
       class ServerRegister extends OriginalClassConstructor {
         public log: Log = new Log('ServerRegister');
         public name: string = OriginalClassConstructor.name;
-        public __seatbelt_plugin_name__: string = pluginConfig.pluginName;
+        public __seatbeltPlugin: string = pluginConfig.pluginName;
         public __seatbelt_hook__?: Function;
         constructor() {
           super();

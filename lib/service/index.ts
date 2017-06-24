@@ -1,7 +1,7 @@
 import { DRegisterPlugin } from '../';
 
 declare type IServiceConstructor = new () => {
-  __seatbelt_plugin_name__: string;
+  __seatbeltPlugin: string;
 };
 
 const serviceRegister: any = {};

@@ -12,21 +12,21 @@ export function DRoute(config: IRouteConfig): any {
       pluginName: 'route'
     })
     class Route extends OriginalClassConstructor {
-      public __seatbelt_config__: IRouteConfig = config;
+      public __seatbeltConfig: IRouteConfig = config;
       public name: string = OriginalClassConstructor.name;
       constructor() {
         super();
-        if (typeof this.__seatbelt_config__.type === 'string') {
-          this.__seatbelt_config__.type = [this.__seatbelt_config__.type];
+        if (typeof this.__seatbeltConfig.type === 'string') {
+          this.__seatbeltConfig.type = [this.__seatbeltConfig.type];
         }
-        if (typeof this.__seatbelt_config__.path === 'string') {
-          this.__seatbelt_config__.path = [this.__seatbelt_config__.path];
+        if (typeof this.__seatbeltConfig.path === 'string') {
+          this.__seatbeltConfig.path = [this.__seatbeltConfig.path];
         }
-        if (!this.__seatbelt_config__.policies) {
-          this.__seatbelt_config__.policies = [];
+        if (!this.__seatbeltConfig.policies) {
+          this.__seatbeltConfig.policies = [];
         }
-        if (typeof this.__seatbelt_config__.policies === 'string') {
-          this.__seatbelt_config__.policies = [this.__seatbelt_config__.policies];
+        if (typeof this.__seatbeltConfig.policies === 'string') {
+          this.__seatbeltConfig.policies = [this.__seatbeltConfig.policies];
         }
       }
     }

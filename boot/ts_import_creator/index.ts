@@ -53,21 +53,23 @@ class Seatbelt {
     const hooks = [];
     const pluginNames = [];
 
+    console.log(Request);
+
     if (Request && typeof Request === 'object') {
       Object.keys(Request).forEach(variable => {
         if (Request[variable] && Request[variable].prototype) {
           const newItem = new Request[variable]();
-          if (newItem.__seatbelt_plugin_name__ === 'server') {
+          if (newItem.__seatbeltPlugin === 'server') {
             this.server = newItem;
-          } else if (newItem.__seatbelt_plugin_name__ && typeof newItem.__seatbelt_plugin_name__ === 'string') {
-            if (!this[newItem.__seatbelt_plugin_name__]) {
-              this[newItem.__seatbelt_plugin_name__] = [];
-              pluginNames.push(newItem.__seatbelt_plugin_name__);
+          } else if (newItem.__seatbeltPlugin && typeof newItem.__seatbeltPlugin === 'string') {
+            if (!this[newItem.__seatbeltPlugin]) {
+              this[newItem.__seatbeltPlugin] = [];
+              pluginNames.push(newItem.__seatbeltPlugin);
               if (newItem.__seatbelt_hook__ && typeof newItem.__seatbelt_hook__ === 'function') {
                 hooks.push(newItem.__seatbelt_hook__);
               }
             }
-            this[newItem.__seatbelt_plugin_name__].push(newItem);
+            this[newItem.__seatbeltPlugin].push(newItem);
           }
         }
       });
@@ -77,7 +79,11 @@ class Seatbelt {
       hook(this);
     });
 
-    if (this.server && this.server.plugins && Array.isArray(this.server.plugins)) {
+    if (!this.server) {
+      throw new Error('failed to initialize server, did you forget to export one?')
+    }
+
+    if (this.server.plugins && Array.isArray(this.server.plugins)) {
       this.server.plugins.forEach(plugin => {
         pluginNames.forEach(pluginName => {
           if (plugin[pluginName] && typeof plugin[pluginName] === typeof (() => {})) {
@@ -87,9 +93,11 @@ class Seatbelt {
       });
     }
 
-    this.server.__seatbelt_server_config__(this.route);
+    if (this.server.config(this.route)) {
+      this.server.config(this.route);
+    }
 
-    if (this.server && this.server.plugins && Array.isArray(this.server.plugins)) {
+    if (this.server.plugins && Array.isArray(this.server.plugins)) {
       this.server.plugins.forEach(plugin => {
         if (plugin.server && typeof plugin.server === typeof (() => {})) {
           plugin.server(this.server);
@@ -101,7 +109,7 @@ class Seatbelt {
 
 const seatbelt = new Seatbelt();
 
-seatbelt.server.__seatbelt_server_init__();
+seatbelt.server.init();
 `;
 
     this.log.system('writing to path', this.writePath, '' + template.length);

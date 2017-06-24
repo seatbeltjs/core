@@ -1,15 +1,29 @@
-export interface IServerRequest {
-    allParams: any;
+import { Log } from '../log';
+import { ClassDecorator } from '../../helpers';
+export declare namespace Server {
+    type Init = () => any;
+    type Config = (routes: any[]) => any;
+    interface Request {
+        allParams: Object;
+    }
+    interface Response {
+        send: (status: number, body: Object) => any;
+    }
+    interface BaseServer {
+        port: number;
+        server: Object;
+        log: Log;
+        conformServerControllerToSeatbeltController: Function;
+        init: Init;
+        config: Config;
+    }
+    interface RouteConfig {
+        type: string[];
+        path: string[];
+    }
+    interface Route {
+        __seatbeltConfig: RouteConfig;
+        controller: (request: Request, response: Response, server: Object) => any;
+    }
+    function Register(): ClassDecorator;
 }
-export interface IServerResponse {
-    send: (status: number, body: any) => any;
-}
-export interface IServerSeatbeltConfig {
-    type: string[];
-    path: string[];
-}
-export interface IServerRoute {
-    controller: (request: IServerRequest, response: IServerResponse, server: any) => any;
-    __seatbelt_config__: IServerSeatbeltConfig;
-}
-export declare function DServerRegister(): Function;
