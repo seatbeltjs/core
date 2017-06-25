@@ -1,4 +1,5 @@
-export declare type IPolicyConstructor = new () => {
-    controller: Function;
-};
-export declare function DPolicy(policyNames?: string | string[]): Function;
+import { Decorator } from '../../helpers';
+export declare namespace Policy {
+    function Register(): Decorator.ClassDecorator;
+    function Use(policyNames: string | string[]): Decorator.MethodDecorator;
+}

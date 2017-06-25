@@ -1,11 +1,12 @@
-import { Log } from '../log';
-import { isPropertyDecorator, PropertyDecorator, ClassDecorator } from '../../helpers';
+import { Log } from '../../';
+import { Plugin } from '../plugin';
+import { Decorator } from '../../helpers';
 
 declare type IServerRegisterConstructor = new () => {
   __seatbeltPlugin: string;
 };
 
-export namespace Server {
+export namespace ServerPlugin {
   export declare type Init = () => any;
   export declare type Config = (routes: any[]) => any;
 
@@ -17,13 +18,10 @@ export namespace Server {
     send: (status: number, body: Object) => any;
   }
 
-  export interface BaseServer {
+  export interface BaseServer extends Plugin.BasePlugin {
     port: number;
     server: Object;
-    log: Log;
     conformServerControllerToSeatbeltController: Function;
-    init: Init;
-    config: Config;
   }
 
   export interface RouteConfig {
@@ -36,21 +34,20 @@ export namespace Server {
     controller: (request: Request, response: Response, server: Object) => any;
   }
 
-  export function Register(): ClassDecorator {
-    return (OriginalClassConstructor: IServerRegisterConstructor): any => {
-      if (isPropertyDecorator(OriginalClassConstructor)) {
-        const log = new Log('ServerRegister');
-        return log.system('server wrapper cannot be used as a property wrapper');
-      }
+  export function Register(): Decorator.ClassDecorator {
+    return (OriginalClassConstructor: Decorator.ClassConstructor): any => {
+
       class ServerRegister extends OriginalClassConstructor {
         public __seatbeltPlugin: string = 'server';
         public __log: Log = new Log('ServerRegister');
         public name: string = OriginalClassConstructor.name;
+
         constructor() {
           super();
           this.__log.system('registering server => ', this.name);
         }
       }
+
       return ServerRegister;
     };
   }

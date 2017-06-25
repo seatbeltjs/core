@@ -1,19 +1,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
-const log_1 = require("../log");
-const helpers_1 = require("../../helpers");
-var Server;
-(function (Server) {
+const _1 = require("../../");
+var ServerPlugin;
+(function (ServerPlugin) {
     function Register() {
         return (OriginalClassConstructor) => {
-            if (helpers_1.isPropertyDecorator(OriginalClassConstructor)) {
-                const log = new log_1.Log('ServerRegister');
-                return log.system('server wrapper cannot be used as a property wrapper');
-            }
             class ServerRegister extends OriginalClassConstructor {
                 constructor() {
                     super();
                     this.__seatbeltPlugin = 'server';
-                    this.__log = new log_1.Log('ServerRegister');
+                    this.__log = new _1.Log('ServerRegister');
                     this.name = OriginalClassConstructor.name;
                     this.__log.system('registering server => ', this.name);
                 }
@@ -21,5 +16,5 @@ var Server;
             return ServerRegister;
         };
     }
-    Server.Register = Register;
-})(Server = exports.Server || (exports.Server = {}));
+    ServerPlugin.Register = Register;
+})(ServerPlugin = exports.ServerPlugin || (exports.ServerPlugin = {}));

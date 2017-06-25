@@ -1,6 +1,6 @@
-import { Log } from '../log';
-import { ClassDecorator } from '../../helpers';
-export declare namespace Server {
+import { Plugin } from '../plugin';
+import { Decorator } from '../../helpers';
+export declare namespace ServerPlugin {
     type Init = () => any;
     type Config = (routes: any[]) => any;
     interface Request {
@@ -9,13 +9,10 @@ export declare namespace Server {
     interface Response {
         send: (status: number, body: Object) => any;
     }
-    interface BaseServer {
+    interface BaseServer extends Plugin.BasePlugin {
         port: number;
         server: Object;
-        log: Log;
         conformServerControllerToSeatbeltController: Function;
-        init: Init;
-        config: Config;
     }
     interface RouteConfig {
         type: string[];
@@ -25,5 +22,5 @@ export declare namespace Server {
         __seatbeltConfig: RouteConfig;
         controller: (request: Request, response: Response, server: Object) => any;
     }
-    function Register(): ClassDecorator;
+    function Register(): Decorator.ClassDecorator;
 }

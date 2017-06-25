@@ -1,30 +1,44 @@
-import { DRegisterPlugin } from '../';
+import { ConfigPlugin, Plugin } from '../../plugins';
+import { Decorator } from '../../helpers';
+import { Log } from '../../';
 
-declare type IServiceConstructor = new () => {
-  __seatbeltPlugin: string;
-};
+const allServices: any = {};
 
-const serviceRegister: any = {};
+export namespace Service {
 
-export function DService(serviceName?: string): Function {
-  return (OriginalClassConstructor: IServiceConstructor, wrappedName?: string, valueObject?: any): any => {
-    if (typeof OriginalClassConstructor === 'function') {
-      @DRegisterPlugin({
-        pluginName: 'service',
-        hook: function(seatbelt: any) {
-          Object.keys(seatbelt).forEach((key: string) => {
-            if (Array.isArray(seatbelt[key])) {
-              seatbelt[key].forEach((plugin: any) => {
-                if (typeof plugin === 'object') {
-                  console.log('>>>', plugin.name);
-                  Object.keys(plugin).forEach((pluginKey: string) => {
-                    console.log(pluginKey);
-                  })
-                }
-              });
-            }
-          });
-        }
+  export class Config implements Plugin.BasePlugin {
+    public log: Log = new Log('ServiceConfig');
+    public config: Plugin.Config = function(seatbelt: any) {
+      Object.keys(seatbelt.plugins).forEach((key: string) => {
+        seatbelt.plugins[key].forEach((plugin: any) => {
+          if (typeof plugin === 'object') {
+            Object.keys(plugin).forEach((pluginKey: string) => {
+              if (plugin[pluginKey].__serviceName) {
+                plugin[pluginKey] = allServices[plugin[pluginKey].__serviceName];
+              }
+            });
+          }
+        });
+      });
+    };
+  }
+
+  export function Use(name: string): Decorator.ParameterDecorator {
+    return (hostClass: any, functionName: string, functionAttributes: any): any => {
+      functionAttributes.value = {__serviceName: name};
+    };
+  }
+
+  export function AllServices(): Decorator.PropertyDecorator {
+    return (target: any, propertyKey: string | symbol): void => {
+      target[propertyKey] = allServices;
+    };
+  }
+
+  export function Register(serviceName?: string): Decorator.ClassDecorator {
+    return (OriginalClassConstructor: Decorator.ClassConstructor): any => {
+      @Plugin.Register({
+        name: 'service'
       })
       class Service extends OriginalClassConstructor {
         public name: string = OriginalClassConstructor.name;
@@ -33,6 +47,6 @@ export function DService(serviceName?: string): Function {
         }
       }
       return Service;
-    }
-  };
+    };
+  }
 }
