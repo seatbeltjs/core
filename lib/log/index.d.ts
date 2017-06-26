@@ -11,6 +11,7 @@ export interface ILog {
 }
 export declare class Log implements ILog {
     constructor(type: string);
+    private _console;
     private _type;
     private _zone;
     private _json(jsonObject);
@@ -18,7 +19,6 @@ export declare class Log implements ILog {
     setZone(zone: string): void;
     getType(): string;
     getZone(): string;
-    private _c;
     private _log(...params);
     error(...params: any[]): void;
     err(...params: any[]): void;

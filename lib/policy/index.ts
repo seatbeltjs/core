@@ -10,13 +10,16 @@ export namespace Policy {
       @Plugin.Register({
         name: 'policy'
       })
-      class Policy extends OriginalClassConstructor {
-        public name: string = OriginalClassConstructor.name;
-        constructor() {
-          super();
-          policyRegister[OriginalClassConstructor.name.toLowerCase()] = this.controller;
-        };
-      }
+      class Policy extends OriginalClassConstructor {}
+
+      policyRegister[OriginalClassConstructor.name.toLowerCase()] = new Policy();
+
+      Policy.prototype = OriginalClassConstructor.prototype;
+      Policy.constructor = OriginalClassConstructor.constructor;
+      Object.defineProperty(Policy, 'name', {
+        value: OriginalClassConstructor.name + Policy.name
+      });
+
       return Policy;
     };
   }
@@ -41,7 +44,7 @@ export namespace Policy {
             return originalFunction.apply(this, [req, res, server]);
           };
           const policyRes: any = Object.assign({}, res, { next });
-          return policyRegister[policyName](req, policyRes, server);
+          return policyRegister[policyName].controller(req, policyRes, server);
         };
       });
     };

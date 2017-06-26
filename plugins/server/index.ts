@@ -44,13 +44,11 @@ export namespace ServerPlugin {
       class ServerRegister extends OriginalClassConstructor {
         public __seatbeltPluginName: string = config.name;
         public __seatbeltPluginType: string = 'server';
-        public __log: Log = new Log('ServerRegister');
-        public name: string = OriginalClassConstructor.name;
-
       }
 
       ServerRegister.prototype = OriginalClassConstructor.prototype;
       ServerRegister.constructor = OriginalClassConstructor.constructor;
+      Object.defineProperty(ServerRegister, 'name', {value: OriginalClassConstructor.name});
 
       return ServerRegister;
     };

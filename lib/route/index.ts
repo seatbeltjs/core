@@ -41,6 +41,9 @@ export namespace Route {
 
       Route.prototype = OriginalClassConstructor.prototype;
       Route.constructor = OriginalClassConstructor.constructor;
+      Object.defineProperty(Route, 'name', {
+        value: OriginalClassConstructor.name + Route.name
+      });
 
       return Route;
     };

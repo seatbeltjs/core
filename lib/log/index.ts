@@ -34,13 +34,14 @@ export class Log implements ILog {
       this.setType(type);
     }
   }
+  private _console: Console = console;
   private _type: string;
   private _zone: string;
   private _json(jsonObject: any) {
     if (!Array.isArray(jsonObject)) {
-      console.log(prettyoutput(jsonObject));
+      this._console.log('\n', prettyoutput(jsonObject));
     } else {
-      console.log(prettyoutput(jsonObject));
+      this._console.log('\n', prettyoutput(jsonObject));
     }
     return 'json';
   }
@@ -60,7 +61,6 @@ export class Log implements ILog {
       return '';
     }
   }
-  private _c = console;
   private _log(...params: any[]) {
     params.forEach(param => {
       if (typeof param === 'object') {

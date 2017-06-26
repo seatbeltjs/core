@@ -1,12 +1,13 @@
 import { Log } from '../../';
 import { Decorator } from '../../helpers';
 
+let i = 0;
+
 export namespace ConfigPlugin {
   export declare type Init = () => any;
   export declare type Config = (seatbelt: any) => any;
 
   export interface BasePlugin {
-    log: Log;
     init?: Init;
     config?: Config;
   }
@@ -18,16 +19,21 @@ export namespace ConfigPlugin {
   export function Register(config: PluginConfig): Decorator.ClassDecorator {
     return function (OriginalClassConstructor: Decorator.ClassConstructor): any {
 
+      const createNameExtension = () => {
+        i = i + 1;
+        return '_PluginConfig_' + OriginalClassConstructor.name + i;
+      };
+
       class PluginConfigRegister extends OriginalClassConstructor {
         public __seatbeltPluginName: string = config.name;
         public __seatbeltPluginType: string = 'config';
-        public __log: Log = new Log('ServerRegister');
-        public name: string = OriginalClassConstructor.name;
-
       }
 
       PluginConfigRegister.prototype = OriginalClassConstructor.prototype;
       PluginConfigRegister.constructor = OriginalClassConstructor.constructor;
+      Object.defineProperty(PluginConfigRegister, 'name', {
+        value: createNameExtension()
+      });
 
       return PluginConfigRegister;
     };

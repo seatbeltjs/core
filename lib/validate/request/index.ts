@@ -1,5 +1,6 @@
 import * as Joi from 'joi';
 import { Decorator } from '../../../helpers';
+import { Log } from '../../';
 
 export type Joi = typeof Joi;
 
@@ -14,6 +15,8 @@ export function ValidateRequest(joyFunction: JoyCallback): Decorator.MethodDecor
         if (!err) {
           return originalMethod.apply(this, [req, res, server]);
         } else {
+          const log = hostClass.log || new Log('Joi');
+          log.error(err);
           return res.send(400, err);
         }
       });
