@@ -1,5 +1,5 @@
-export * from './route';
-export * from './policy';
-export * from './service';
-export * from './log';
-export * from './validate';
+export { Route } from './route';
+export { Policy } from './policy';
+export { Service, ServiceConfig } from './service';
+export { Log } from './log';
+export { Validate } from './validate';

@@ -17,28 +17,31 @@ export namespace Route {
 
   export function Register(config: IRouteConfig): Decorator.ClassDecorator {
     return function(OriginalClassConstructor: Decorator.ClassConstructor) {
+
+      if (typeof config.type === 'string') {
+        config.type = [config.type];
+      }
+      if (typeof config.path === 'string') {
+        config.path = [config.path];
+      }
+      if (!config.policies) {
+        config.policies = [];
+      }
+      if (typeof config.policies === 'string') {
+        config.policies = [config.policies];
+      }
+
       @Plugin.Register({
         name: 'route'
       })
       class Route extends OriginalClassConstructor {
-        public __seatbeltConfig: IRouteConfig = config;
+        public __routeConfig: IRouteConfig = config;
         public name: string = OriginalClassConstructor.name;
-        constructor() {
-          super();
-          if (typeof this.__seatbeltConfig.type === 'string') {
-            this.__seatbeltConfig.type = [this.__seatbeltConfig.type];
-          }
-          if (typeof this.__seatbeltConfig.path === 'string') {
-            this.__seatbeltConfig.path = [this.__seatbeltConfig.path];
-          }
-          if (!this.__seatbeltConfig.policies) {
-            this.__seatbeltConfig.policies = [];
-          }
-          if (typeof this.__seatbeltConfig.policies === 'string') {
-            this.__seatbeltConfig.policies = [this.__seatbeltConfig.policies];
-          }
-        }
       }
+
+      Route.prototype = OriginalClassConstructor.prototype;
+      Route.constructor = OriginalClassConstructor.constructor;
+
       return Route;
     };
   }

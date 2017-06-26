@@ -31,7 +31,7 @@ class TSImportCreator {
     }
     ;
     _createServerTS(files) {
-        this.writePath = path_1.join(this.seatbeltPath, 'server.ts');
+        this.writePath = path_1.join(this.seatbeltPath, 'index.ts');
         let template = fs_1.readFileSync(path_1.join(__dirname, 'boot.ts.template'));
         this.log.system('writing to path', this.writePath, '' + template.length);
         fs_1.writeFileSync(this.writePath, template);

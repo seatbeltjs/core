@@ -1,5 +1,5 @@
 import * as chalk from 'chalk';
-const json = require('json-beautify');
+const prettyoutput = require('prettyoutput');
 
 const error = (...params: string[]) => chalk.red.bold(...params);
 const warn = (...params: string[]) => chalk.yellow.bold(...params);
@@ -36,8 +36,13 @@ export class Log implements ILog {
   }
   private _type: string;
   private _zone: string;
-  private _json(jsonObject: Object) {
-    return json(jsonObject);
+  private _json(jsonObject: any) {
+    if (!Array.isArray(jsonObject)) {
+      console.log(prettyoutput(jsonObject));
+    } else {
+      console.log(prettyoutput(jsonObject));
+    }
+    return 'json';
   }
   public setType(type: string) {
     this._type = type;
@@ -58,11 +63,13 @@ export class Log implements ILog {
   private _c = console;
   private _log(...params: any[]) {
     params.forEach(param => {
-      param = param.toString();
       if (typeof param === 'object') {
         param = this._json(param);
       }
-      if (typeof param === 'function') {
+      if (param === undefined) {
+        param = 'undefined';
+      }
+      if (typeof param !== 'string' && typeof param !== 'object' && param.toString) {
         param = param.toString();
       }
       process.stdout.write(param);

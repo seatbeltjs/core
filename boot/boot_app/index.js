@@ -9,7 +9,7 @@ class BootApp {
     init() {
         this.log.system('Booting App');
         require('nodemon')({
-            script: path_1.join(this.appPath, '.seatbelt', 'server.js'),
+            script: path_1.join(this.appPath, '.seatbelt'),
             verbose: true
         });
     }

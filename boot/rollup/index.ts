@@ -7,10 +7,12 @@ export class Rollup {
   private log = new Log('Seatbelt-Rollup');
   private appPath: string;
   private seatbeltPath: string;
+
   constructor(path: string) {
     this.appPath = path;
   }
-  public init(cb: Function) {
+
+  public createImports(cb: Function) {
     this.seatbeltPath = join(this.appPath, '.seatbelt');
     this.log.system('rolling up files to path', this.seatbeltPath);
     if (!existsSync(this.seatbeltPath)) {
@@ -20,21 +22,25 @@ export class Rollup {
 
     const npmSpawn = spawn(`npm`, ['bin']);
     let npmBin;
+    const logs: string[] = [];
     npmSpawn.stdout.on('data', (data: string) => {
       npmBin = data.toString().replace(/\n/g, '');
-      const rollupSpawn = spawn(`node`, [`${npmBin}/rollup`, '--config', this.seatbeltPath + '/rollupconfig.js', '--input', this.seatbeltPath + '/server.ts', '--output', this.seatbeltPath + '/server.js']);
+      const rollupSpawn = spawn(`node`, [`${npmBin}/rollup`, '--config', this.seatbeltPath + '/rollupconfig.js', '--input', this.seatbeltPath + '/index.ts', '--output', this.seatbeltPath + '/index.js']);
+      const logs: string[] =  [];
       rollupSpawn.stdout.on('data', (data: string) => {
-        this.log.system(`[rollup]: ${data}`);
+        logs.push(data.toString());
       });
       rollupSpawn.stderr.on('data', (data: string) => {
-        this.log.error(`[rollup] error: ${data}`);
+        logs.push(data.toString());
       });
       rollupSpawn.on('close', (code: number) => {
+        this.log.system(`[rollup]`, ...logs);
         cb();
       });
     });
   }
-  public initImports() {
+
+  public createIndex(cb: Function) {
     this.seatbeltPath = join(this.appPath, '.seatbelt');
     this.log.system('rolling up files to path', this.seatbeltPath);
     if (!existsSync(this.seatbeltPath)) {
@@ -47,11 +53,16 @@ export class Rollup {
     npmSpawn.stdout.on('data', (data: string) => {
       npmBin = data.toString().replace(/\n/g, '');
       const rollupSpawn = spawn(`node`, [`${npmBin}/rollup`, '--config', this.seatbeltPath + '/rollupconfig.js', '--input', this.seatbeltPath + '/index.ts', '--output', this.seatbeltPath + '/index.js']);
+      const logs: string[] = [];
       rollupSpawn.stdout.on('data', (data: string) => {
-        this.log.system(`[rollup]: ${data}`);
+        logs.push(data.toString());
       });
       rollupSpawn.stderr.on('data', (data: string) => {
-        this.log.error(`[rollup] error: ${data}`);
+        logs.push(data.toString());
+      });
+      rollupSpawn.on('close', (code: number) => {
+        this.log.system(`[rollup]`, ...logs);
+        cb();
       });
     });
   }

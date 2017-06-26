@@ -16,6 +16,7 @@
   "author": "Thomas Meadows",
   "license": "ISC",
   "devDependencies": {
+    "prettyoutput": "^1.1.1",
     "rollup": "^0.41.6",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-node-resolve": "~2.0.0",
@@ -34,6 +35,7 @@
     "joi": "^10.4.1",
     "json-beautify": "^1.0.1",
     "nodemon": "^1.11.0",
+    "prettyjson": "^1.2.1",
     "scan-folder": "^1.0.0"
   }
 }

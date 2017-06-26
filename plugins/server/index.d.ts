@@ -19,8 +19,11 @@ export declare namespace ServerPlugin {
         path: string[];
     }
     interface Route {
-        __seatbeltConfig: RouteConfig;
+        __routeConfig: RouteConfig;
         controller: (request: Request, response: Response, server: Object) => any;
     }
-    function Register(): Decorator.ClassDecorator;
+    interface PluginConfig {
+        name: string;
+    }
+    function Register(config: PluginConfig): Decorator.ClassDecorator;
 }

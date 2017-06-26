@@ -1,12 +1,14 @@
 import { Plugin } from '../../plugins';
 import { Decorator } from '../../helpers';
 import { Log } from '../../';
+export declare class ServiceConfig implements Plugin.BasePlugin {
+    __seatbeltPluginName: string;
+    __seatbeltPluginType: string;
+    log: Log;
+    config: Plugin.Config;
+}
 export declare namespace Service {
-    class Config implements Plugin.BasePlugin {
-        log: Log;
-        config: Plugin.Config;
-    }
-    function Use(name: string): Decorator.ParameterDecorator;
+    function Use(name: string): Decorator.PropertyDecorator;
     function AllServices(): Decorator.PropertyDecorator;
     function Register(serviceName?: string): Decorator.ClassDecorator;
 }

@@ -13,4 +13,5 @@ export declare class Seatbelt implements ISeatbelt {
     private _createTSImporter();
     private _rollUpFiles(cb);
     strap(): void;
+    init: () => void;
 }

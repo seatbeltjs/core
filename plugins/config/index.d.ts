@@ -11,5 +11,5 @@ export declare namespace ConfigPlugin {
     interface PluginConfig {
         name: string;
     }
-    function Register(config?: PluginConfig): Decorator.ClassDecorator;
+    function Register(config: PluginConfig): Decorator.ClassDecorator;
 }

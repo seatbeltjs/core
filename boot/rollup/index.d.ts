@@ -3,6 +3,6 @@ export declare class Rollup {
     private appPath;
     private seatbeltPath;
     constructor(path: string);
-    init(cb: Function): void;
-    initImports(): void;
+    createImports(cb: Function): void;
+    createIndex(cb: Function): void;
 }

@@ -3,19 +3,18 @@ const _1 = require("../../");
 var Plugin;
 (function (Plugin) {
     function Register(config) {
-        return (OriginalClassConstructor) => {
+        return function (OriginalClassConstructor) {
             class PluginRegister extends OriginalClassConstructor {
-                constructor(...params) {
-                    super(...params);
-                    this.__seatbeltPlugin = OriginalClassConstructor.name;
+                constructor() {
+                    super(...arguments);
+                    this.__seatbeltPluginName = config.name;
+                    this.__seatbeltPluginType = 'plugin';
                     this.__log = new _1.Log('ServerRegister');
                     this.name = OriginalClassConstructor.name;
-                    if (config && config.name) {
-                        this.__seatbeltPlugin = config.name;
-                    }
-                    this.__log.system('registering plugin => ', this.name);
                 }
             }
+            PluginRegister.prototype = OriginalClassConstructor.prototype;
+            PluginRegister.constructor = OriginalClassConstructor.constructor;
             return PluginRegister;
         };
     }

@@ -25,12 +25,15 @@ export class Seatbelt implements ISeatbelt {
   private log = new Log('Seatbelt');
   private _root: string = '';
   private _app: any;
+
   private _setRoot(root: string) {
     this._root = root;
   }
+
   public getRoot(): string {
     return this._root;
   }
+
   private _initConfig(cb: Function) {
     const configFolder = join(this.getRoot(), CONFIG_FOLDER);
     const configFolderExist = existsSync(configFolder);
@@ -39,17 +42,22 @@ export class Seatbelt implements ISeatbelt {
 
     return cb();
   }
+
   private _bootApp() {
     return new BootApp(this.getRoot()).init();
   }
+
   private _createTSImporter() {
     return new TSImportCreator(this.getRoot()).init();
   }
+
   private _rollUpFiles(cb: Function) {
     const rollup = new Rollup(this.getRoot());
-    rollup.initImports();
-    return rollup.init(cb);
+    rollup.createImports(() => {
+      return rollup.createIndex(cb);
+    });
   }
+
   public strap() {
     this._setRoot(callerName());
     this.log.system('▬▬▬▬(๑๑)▬▬▬▬ setbelt strapped to', this.getRoot());
@@ -58,4 +66,6 @@ export class Seatbelt implements ISeatbelt {
       this._bootApp();
     });
   }
+  public init = this.strap;
+
 }

@@ -2,36 +2,50 @@ import { ConfigPlugin, Plugin } from '../../plugins';
 import { Decorator } from '../../helpers';
 import { Log } from '../../';
 
-const allServices: any = {};
+const __allServices: any = {};
+
+export class ServiceConfig implements Plugin.BasePlugin {
+  public __seatbeltPluginName: string = 'ServiceConfig';
+  public __seatbeltPluginType: string = 'config';
+  public log: Log = new Log('ServiceConfig');
+
+  public config: Plugin.Config = function(seatbelt: any) {
+    Object.getOwnPropertyNames(seatbelt.plugins).forEach((key: string) => {
+      this.log.debug('==> key', key);
+      seatbelt.plugins[key].forEach((plugin: any) => {
+        if (typeof plugin === 'object') {
+          Object.getOwnPropertyNames(plugin).forEach((pluginKey: string) => {
+            console.log(pluginKey)
+            if (typeof plugin[pluginKey] === 'object' && plugin[pluginKey].__serviceName) {
+              // this.log('found', JSON.stringify(plugin[pluginKey].__serviceName));
+            }
+          });
+        }
+      });
+    });
+  };
+}
 
 export namespace Service {
 
-  export class Config implements Plugin.BasePlugin {
-    public log: Log = new Log('ServiceConfig');
-    public config: Plugin.Config = function(seatbelt: any) {
-      Object.keys(seatbelt.plugins).forEach((key: string) => {
-        seatbelt.plugins[key].forEach((plugin: any) => {
-          if (typeof plugin === 'object') {
-            Object.keys(plugin).forEach((pluginKey: string) => {
-              if (plugin[pluginKey].__serviceName) {
-                plugin[pluginKey] = allServices[plugin[pluginKey].__serviceName];
-              }
-            });
-          }
-        });
-      });
-    };
-  }
+  export function Use(name: string): Decorator.PropertyDecorator {
+    return function(target: any, key: string): void  {
 
-  export function Use(name: string): Decorator.ParameterDecorator {
-    return (hostClass: any, functionName: string, functionAttributes: any): any => {
-      functionAttributes.value = {__serviceName: name};
+      delete target[key];
+
+      Object.defineProperty(target, key, {
+        get: function() { return (() => __allServices[key]) },
+        enumerable: true,
+        configurable: false
+      });
+
     };
+
   }
 
   export function AllServices(): Decorator.PropertyDecorator {
     return (target: any, propertyKey: string | symbol): void => {
-      target[propertyKey] = allServices;
+      target[propertyKey] = __allServices;
     };
   }
 
@@ -46,6 +60,8 @@ export namespace Service {
           super();
         }
       }
+      __allServices[OriginalClassConstructor.name] = new Service();
+
       return Service;
     };
   }

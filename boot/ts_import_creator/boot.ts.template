@@ -13,18 +13,16 @@ class Seatbelt {
         } else {
           newItem = AllProjectExports[variable];
         }
-        console.log('var', variable, 'type', typeof newItem, 'plugin', newItem.__seatbeltPlugin);
         if (typeof newItem === 'object') {
-          if (newItem.__seatbeltPlugin === 'server') {
+          if (newItem.__seatbeltPluginType === 'server') {
             this.server = newItem;
-          } else if (newItem.__seatbeltPlugin === 'config') {
-            this.pluginConfigs[newItem.name] = newItem;
-          } else {
-            // console.log(newItem.__seatbeltPlugin);
-            if (!this.plugins[newItem.__seatbeltPlugin]) {
-              this.plugins[newItem.__seatbeltPlugin] = [];
+          } else if (newItem.__seatbeltPluginType === 'config') {
+            this.pluginConfigs[newItem.__seatbeltPluginName] = newItem;
+          } else if (newItem.__seatbeltPluginType === 'plugin') {
+            if (!this.plugins[newItem.__seatbeltPluginName]) {
+              this.plugins[newItem.__seatbeltPluginName] = [];
             }
-            this.plugins[newItem.__seatbeltPlugin].push(newItem);
+            this.plugins[newItem.__seatbeltPluginName].push(newItem);
           }
         }
       });
@@ -35,8 +33,8 @@ class Seatbelt {
     }
 
     Object.keys(this.pluginConfigs).forEach(name => {
-      if (this[name].config) {
-        this[name].config(this);
+      if (this.pluginConfigs[name].config) {
+        this.pluginConfigs[name].config(this);
       }
     })
 

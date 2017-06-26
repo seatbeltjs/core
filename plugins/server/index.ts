@@ -30,23 +30,27 @@ export namespace ServerPlugin {
   }
 
   export interface Route {
-    __seatbeltConfig: RouteConfig;
+    __routeConfig: RouteConfig;
     controller: (request: Request, response: Response, server: Object) => any;
   }
 
-  export function Register(): Decorator.ClassDecorator {
-    return (OriginalClassConstructor: Decorator.ClassConstructor): any => {
+  export interface PluginConfig {
+    name: string;
+  }
+
+  export function Register(config: PluginConfig): Decorator.ClassDecorator {
+    return function (OriginalClassConstructor: Decorator.ClassConstructor): any {
 
       class ServerRegister extends OriginalClassConstructor {
-        public __seatbeltPlugin: string = 'server';
+        public __seatbeltPluginName: string = config.name;
+        public __seatbeltPluginType: string = 'server';
         public __log: Log = new Log('ServerRegister');
         public name: string = OriginalClassConstructor.name;
 
-        constructor() {
-          super();
-          this.__log.system('registering server => ', this.name);
-        }
       }
+
+      ServerRegister.prototype = OriginalClassConstructor.prototype;
+      ServerRegister.constructor = OriginalClassConstructor.constructor;
 
       return ServerRegister;
     };

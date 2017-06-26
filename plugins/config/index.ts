@@ -15,23 +15,21 @@ export namespace ConfigPlugin {
     name: string;
   }
 
-  export function Register(config?: PluginConfig): Decorator.ClassDecorator {
-    return (OriginalClassConstructor: Decorator.ClassConstructor): any => {
+  export function Register(config: PluginConfig): Decorator.ClassDecorator {
+    return function (OriginalClassConstructor: Decorator.ClassConstructor): any {
 
-      class PluginRegister extends OriginalClassConstructor {
-        public __seatbeltPlugin: string = 'config';
+      class PluginConfigRegister extends OriginalClassConstructor {
+        public __seatbeltPluginName: string = config.name;
+        public __seatbeltPluginType: string = 'config';
         public __log: Log = new Log('ServerRegister');
         public name: string = OriginalClassConstructor.name;
-        constructor(...params: any[]) {
-          super(...params);
-          if (config && config.name) {
-            this.__seatbeltPlugin = config.name;
-          }
-          this.__log.system('registering plugin => ', this.name);
-        }
+
       }
 
-      return PluginRegister;
+      PluginConfigRegister.prototype = OriginalClassConstructor.prototype;
+      PluginConfigRegister.constructor = OriginalClassConstructor.constructor;
+
+      return PluginConfigRegister;
     };
   }
 }

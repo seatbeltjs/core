@@ -19,6 +19,7 @@ class Seatbelt {
     constructor() {
         this.log = new _1.Log('Seatbelt');
         this._root = '';
+        this.init = this.strap;
     }
     _setRoot(root) {
         this._root = root;
@@ -41,8 +42,9 @@ class Seatbelt {
     }
     _rollUpFiles(cb) {
         const rollup = new rollup_1.Rollup(this.getRoot());
-        rollup.initImports();
-        return rollup.init(cb);
+        rollup.createImports(() => {
+            return rollup.createIndex(cb);
+        });
     }
     strap() {
         this._setRoot(callerName());

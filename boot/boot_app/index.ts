@@ -12,7 +12,7 @@ export class BootApp {
     this.log.system('Booting App');
 
     require('nodemon')({
-      script: join(this.appPath, '.seatbelt', 'server.js'),
+      script: join(this.appPath, '.seatbelt'),
       verbose: true
     });
 
