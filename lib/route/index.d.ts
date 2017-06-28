@@ -1,4 +1,6 @@
 import { Decorator } from '../../helpers';
+export * from './request';
+export * from './response';
 export interface IRouteConfig {
     type: string | string[];
     path: string | string[];

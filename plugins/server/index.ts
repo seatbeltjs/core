@@ -1,6 +1,7 @@
 import { Log } from '../../';
 import { Plugin } from '../plugin';
 import { Decorator } from '../../helpers';
+import { Request, Response } from '../../';
 
 declare type IServerRegisterConstructor = new () => {
   __seatbeltPlugin: string;
@@ -9,14 +10,6 @@ declare type IServerRegisterConstructor = new () => {
 export namespace ServerPlugin {
   export declare type Init = () => any;
   export declare type Config = (routes: any[]) => any;
-
-  export interface Request {
-    allParams: Object;
-  }
-
-  export interface Response {
-    send: (status: number, body: Object) => any;
-  }
 
   export interface BaseServer extends Plugin.BasePlugin {
     port: number;
@@ -31,7 +24,7 @@ export namespace ServerPlugin {
 
   export interface Route {
     __routeConfig: RouteConfig;
-    controller: (request: Request, response: Response, server: Object) => any;
+    controller: (request: Request.Base, response: Response.Base, server: Object) => any;
   }
 
   export interface PluginConfig {
