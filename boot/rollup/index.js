@@ -1,6 +1,5 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const _1 = require("../../");
-const fs_1 = require("fs");
 const path_1 = require("path");
 const spawn = require('child_process').spawn;
 class Rollup {
@@ -11,9 +10,6 @@ class Rollup {
     createImports(cb) {
         this.seatbeltPath = path_1.join(this.appPath, '.seatbelt');
         this.log.system('rolling up files to path', this.seatbeltPath);
-        if (!fs_1.existsSync(this.seatbeltPath)) {
-            fs_1.mkdirSync(this.seatbeltPath);
-        }
         const rollup = require('rollup');
         const npmSpawn = spawn(`npm`, ['bin']);
         let npmBin;
@@ -37,9 +33,6 @@ class Rollup {
     createIndex(cb) {
         this.seatbeltPath = path_1.join(this.appPath, '.seatbelt');
         this.log.system('rolling up files to path', this.seatbeltPath);
-        if (!fs_1.existsSync(this.seatbeltPath)) {
-            fs_1.mkdirSync(this.seatbeltPath);
-        }
         const rollup = require('rollup');
         const npmSpawn = spawn(`npm`, ['bin']);
         let npmBin;

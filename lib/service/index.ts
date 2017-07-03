@@ -33,16 +33,4 @@ export namespace Service {
       });
     };
   }
-
-  export function UseAll(): Decorator.PropertyDecorator {
-    return (target: any, key: string | symbol): void => {
-      delete target[key];
-
-      Object.defineProperty(target, key, {
-        get: function() { return __allServices; },
-        enumerable: true,
-        configurable: true
-      });
-    };
-  }
 }

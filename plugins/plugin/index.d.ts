@@ -1,13 +1,13 @@
 import { Decorator } from '../../helpers';
 export declare namespace Plugin {
-    type Init = () => any;
-    type Config = (seatbelt: any) => any;
-    interface BasePlugin {
+    type Init = (seatbelt: any) => any;
+    type Config = (seatbelt: any, cb: Function) => any;
+    interface BaseInterface {
         init?: Init;
         config?: Config;
     }
-    interface PluginConfig {
+    interface PluginConfigInterface {
         name: string;
     }
-    function Register(config: PluginConfig): Decorator.ClassDecorator;
+    function Register(config: PluginConfigInterface): Decorator.ClassDecorator;
 }

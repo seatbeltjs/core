@@ -1,9 +1,9 @@
 import { dirname, join } from 'path';
-import { existsSync } from 'fs';
 import { Log } from '../';
 import { TSImportCreator } from './ts_import_creator';
 import { Rollup } from './rollup';
 import { BootApp } from './boot_app';
+import { existsSync, unlinkSync, mkdirSync, writeFileSync, readdirSync, statSync, rmdirSync } from 'fs';
 
 const CONFIG_FOLDER = '.seatbelt';
 const CONFIG_JSON = 'seatbelt.json';
@@ -12,6 +12,20 @@ export interface ISeatbelt {
   strap(): void;
   getRoot(): string;
 }
+
+const removeFolder = function removeFolder(location: string) {
+  const files = readdirSync(location);
+  files.forEach((file: string) => {
+    file = location + '/' + file;
+    const stat = statSync(file);
+    if (stat.isDirectory()) {
+      return removeFolder(file);
+    } else {
+      unlinkSync(file);
+    }
+  });
+  rmdirSync(location);
+};
 
 const callerName = (): string => {
   if (module.parent && module.parent.parent && module.parent.parent.filename) {
@@ -26,21 +40,27 @@ export class Seatbelt implements ISeatbelt {
   private _root: string = '';
   private _app: any;
 
+  public init() {
+    this._setRoot(callerName());
+    if (existsSync(join(this.getRoot(), '.seatbelt'))) {
+      removeFolder(join(this.getRoot(), '.seatbelt'));
+    }
+    mkdirSync(join(this.getRoot(), '.seatbelt'));
+    this.log.system('▬▬▬▬(๑๑)▬▬▬▬ setbelt strapped to', this.getRoot());
+    this._createTSImporter();
+    this._rollUpFiles(() => {
+      this._bootApp();
+    });
+  };
+
+  public strap = this.init;
+
   private _setRoot(root: string) {
     this._root = root;
   }
 
   public getRoot(): string {
     return this._root;
-  }
-
-  private _initConfig(cb: Function) {
-    const configFolder = join(this.getRoot(), CONFIG_FOLDER);
-    const configFolderExist = existsSync(configFolder);
-    const configJson = join(configFolder, CONFIG_JSON);
-    const configJsonExist = existsSync(join(this.getRoot(), CONFIG_FOLDER, CONFIG_JSON));
-
-    return cb();
   }
 
   private _bootApp() {
@@ -57,15 +77,5 @@ export class Seatbelt implements ISeatbelt {
       return rollup.createIndex(cb);
     });
   }
-
-  public strap() {
-    this._setRoot(callerName());
-    this.log.system('▬▬▬▬(๑๑)▬▬▬▬ setbelt strapped to', this.getRoot());
-    this._createTSImporter();
-    this._rollUpFiles(() => {
-      this._bootApp();
-    });
-  }
-  public init = this.strap;
 
 }

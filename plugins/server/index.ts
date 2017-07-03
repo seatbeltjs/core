@@ -1,37 +1,36 @@
-import { Log } from '../../';
+import { Log, Route } from '../../';
 import { Plugin } from '../plugin';
 import { Decorator } from '../../helpers';
-import { Request, Response } from '../../';
 
 declare type IServerRegisterConstructor = new () => {
   __seatbeltPlugin: string;
 };
 
 export namespace ServerPlugin {
-  export declare type Init = () => any;
-  export declare type Config = (routes: any[]) => any;
+  export declare type Init = (seatbelt: any) => any;
+  export declare type Config = (seatbelt: any, cb: Function) => any;
 
-  export interface BaseServer extends Plugin.BasePlugin {
+  export interface BaseInterface extends Plugin.BaseInterface {
     port: number;
     server: Object;
     conformServerControllerToSeatbeltController: Function;
   }
 
-  export interface RouteConfig {
+  export interface RouteConfigInterface {
     type: string[];
     path: string[];
   }
 
-  export interface Route {
-    __routeConfig: RouteConfig;
-    controller: (request: Request.Base, response: Response.Base, server: Object) => any;
+  export interface RouteInterface {
+    __routeConfig: RouteConfigInterface;
+    controller: (request: Route.Request.BaseInterface, response: Route.Response.BaseInterface, server: Object) => any;
   }
 
-  export interface PluginConfig {
+  export interface PluginConfigInterface {
     name: string;
   }
 
-  export function Register(config: PluginConfig): Decorator.ClassDecorator {
+  export function Register(config: PluginConfigInterface): Decorator.ClassDecorator {
     return function (OriginalClassConstructor: Decorator.ClassConstructor): any {
 
       class ServerRegister extends OriginalClassConstructor {

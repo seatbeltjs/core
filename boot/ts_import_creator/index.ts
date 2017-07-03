@@ -8,6 +8,15 @@ export class TSImportCreator {
   private appPath: string;
   private seatbeltPath: string;
 
+  public init() {
+    this.log.system('creating ts importer');
+    const files = scanFolder(this.appPath, 'ts', true).filter((path: string) => path.indexOf('/.seatbelt/') === -1);
+    this.log.system('files found', files);
+    this._createPath();
+    this._createImportsTS(files);
+    this._createServerTS(files);
+  }
+
   private writePath: string;
   constructor(path: string) {
     this.appPath = path;
@@ -29,29 +38,26 @@ export class TSImportCreator {
 
   private _createImportsTS(files: string[]) {
     this.seatbeltPath = join(this.appPath, '.seatbelt');
-    let exportTemplate = '';
+    let importsTemplate = '';
+    let importsTemplateBottom = '\nexport const allImports = {';
     files.forEach((file, i) => {
       file = file.slice(0, -3);
-      exportTemplate += `export * from '${file}';\n`;
+      importsTemplate += `import * as File${i} from '${file}';\n`;
+      importsTemplateBottom += `\n  File${i}`;
+      if (files[i + 1]) {
+        importsTemplateBottom += ',';
+      }
     });
-    writeFileSync(join(this.seatbeltPath, 'imports.ts'), exportTemplate);
+    importsTemplateBottom += '\n};';
+    writeFileSync(join(this.seatbeltPath, 'imports.ts'), importsTemplate + importsTemplateBottom);
   };
 
   private _createServerTS(files: string[]) {
     this.writePath = join(this.seatbeltPath, 'index.ts');
     let template = readFileSync(join(__dirname, 'boot.ts.template'));
 
-    this.log.system('writing to path', this.writePath, '' + template.length);
+    this.log.system('writing server template to path', this.writePath, '' + template.length);
     writeFileSync(this.writePath, template);
     this._createRollupConfig();
-  }
-
-  public init() {
-    this.log.system('creating ts importer');
-    const files = scanFolder(this.appPath, 'ts', true).filter((path: string) => path.indexOf('/.seatbelt/') === -1);
-    this.log.system('files found', files);
-    this._createPath();
-    this._createImportsTS(files);
-    this._createServerTS(files);
   }
 }

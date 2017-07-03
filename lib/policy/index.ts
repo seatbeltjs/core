@@ -5,6 +5,30 @@ import { Log, Route } from '../../';
 const policyRegister: any = {};
 
 export namespace Policy {
+  export interface BaseInterface {
+    controller: (req: Request.BaseInterface, res: Response.BaseInterface, server?: Object) => any;
+  }
+
+  export namespace Response {
+    export interface BaseInterface {
+      next: () => any;
+      send: (status: number, body: Object) => any;
+      ok: (body: Object) => any;
+      created: (body: Object) => any;
+      badRequest: (body: Object) => any;
+      unauthorized: (body: Object) => any;
+      forbidden: (body: Object) => any;
+      notFound: (body: Object) => any;
+      serverError: (body: Object) => any;
+    }
+  }
+
+  export namespace Request {
+    export interface BaseInterface {
+      allParams: Object;
+    }
+  }
+
   export function Register(): Decorator.ClassDecorator {
     return (OriginalClassConstructor: Decorator.ClassConstructor&Route.RouteConstructor): any => {
       @Plugin.Register({

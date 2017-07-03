@@ -1,5 +1,4 @@
 import { Log } from '../../';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 const spawn = require('child_process').spawn;
 
@@ -15,9 +14,6 @@ export class Rollup {
   public createImports(cb: Function) {
     this.seatbeltPath = join(this.appPath, '.seatbelt');
     this.log.system('rolling up files to path', this.seatbeltPath);
-    if (!existsSync(this.seatbeltPath)) {
-      mkdirSync(this.seatbeltPath);
-    }
     const rollup = require( 'rollup' );
 
     const npmSpawn = spawn(`npm`, ['bin']);
@@ -43,9 +39,6 @@ export class Rollup {
   public createIndex(cb: Function) {
     this.seatbeltPath = join(this.appPath, '.seatbelt');
     this.log.system('rolling up files to path', this.seatbeltPath);
-    if (!existsSync(this.seatbeltPath)) {
-      mkdirSync(this.seatbeltPath);
-    }
     const rollup = require( 'rollup' );
 
     const npmSpawn = spawn(`npm`, ['bin']);

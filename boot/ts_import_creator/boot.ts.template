@@ -4,44 +4,87 @@ class Seatbelt {
   constructor() {
     this.plugins = {};
     this.pluginConfigs = {};
+    this.pluginConfigNames = [];
+    this.server = null;
 
-    if (AllProjectExports && typeof AllProjectExports === 'object') {
-      Object.keys(AllProjectExports).forEach(variable => {
-        let newItem;
-        if (AllProjectExports[variable] && AllProjectExports[variable].prototype) {
-          newItem = new AllProjectExports[variable]();
-        } else {
-          newItem = AllProjectExports[variable];
-        }
-        if (typeof newItem === 'object') {
-          if (newItem.__seatbeltPluginType === 'server') {
-            this.server = newItem;
-          } else if (newItem.__seatbeltPluginType === 'config') {
-            this.pluginConfigs[newItem.__seatbeltPluginName] = newItem;
-          } else if (newItem.__seatbeltPluginType === 'plugin') {
-            if (!this.plugins[newItem.__seatbeltPluginName]) {
-              this.plugins[newItem.__seatbeltPluginName] = [];
-            }
-            this.plugins[newItem.__seatbeltPluginName].push(newItem);
-          }
-        }
+    this.init = () => {
+      this.initializedAllPluginTypes();
+      this.throwErrorIfNoServerDeclared();
+      this.runPluginConfigs(() => {
+        this.configureServerAndBootServer();
       });
     }
 
-    if (!this.server) {
-      throw new Error('failed to initialize server, did you forget to export one?')
+    // iterates all files exported by the entire application and sorts them by plugin type
+    this.initializedAllPluginTypes = () => {
+      if (AllProjectExports && typeof AllProjectExports === 'object') {
+        Object.keys(AllProjectExports).forEach(eachFileExportKey => {
+          if (AllProjectExports[eachFileExportKey] && typeof AllProjectExports[eachFileExportKey] === 'object') {
+            Object.keys(AllProjectExports[eachFileExportKey]).forEach(key => {
+              const exportedClassesAndObjects = AllProjectExports[eachFileExportKey][key];
+              if (exportedClassesAndObjects && typeof exportedClassesAndObjects === 'object') {
+                Object.keys(exportedClassesAndObjects).forEach(key2 => {
+                  const SeatbeltPluginClassOrObject = exportedClassesAndObjects[key2];
+                  this.initPlugin(SeatbeltPluginClassOrObject);
+                });
+              }
+            });
+          }
+        });
+      }
     }
 
-    Object.keys(this.pluginConfigs).forEach(name => {
-      if (this.pluginConfigs[name].config) {
-        this.pluginConfigs[name].config(this);
+    this.initPlugin = (SeatbeltPluginClassOrObject) => {
+      let initializedPlugin;
+      if (SeatbeltPluginClassOrObject && SeatbeltPluginClassOrObject.prototype) {
+        initializedPlugin = new SeatbeltPluginClassOrObject();
+      } else {
+        initializedPlugin = SeatbeltPluginClassOrObject;
       }
-    })
+      if (typeof initializedPlugin === 'object') {
+        if (initializedPlugin.__seatbeltPluginType === 'server') {
+          this.server = initializedPlugin;
+        } else if (initializedPlugin.__seatbeltPluginType === 'config') {
+          this.pluginConfigs[initializedPlugin.__seatbeltPluginName] = initializedPlugin;
+          this.pluginConfigNames.push(initializedPlugin.__seatbeltPluginName);
+        } else if (initializedPlugin.__seatbeltPluginType === 'plugin') {
+          if (!this.plugins[initializedPlugin.__seatbeltPluginName]) {
+            this.plugins[initializedPlugin.__seatbeltPluginName] = [];
+          }
+          this.plugins[initializedPlugin.__seatbeltPluginName].push(initializedPlugin);
+        }
+      }
+    }
 
-    this.server.config(this);
+    this.throwErrorIfNoServerDeclared = () => {
+      if (!this.server) {
+        throw new Error('failed to initialize server, did you forget to export one?')
+      }
+    }
+
+    this.runPluginConfigs = (cb) => {
+      const recursivePluginConfig = (pluginNames) => {
+        if (this.pluginConfigs[pluginNames[0]].config) {
+          this.pluginConfigs[pluginNames[0]].config(this, () => {
+            if (pluginNames.length > 1) {
+              this.runPluginConfigs(pluginNames.slice(1));
+            } else {
+              cb();
+            }
+          });
+        }
+      }
+      recursivePluginConfig(this.pluginConfigNames);
+    }
+
+    this.configureServerAndBootServer = () => {
+      this.server.config(this, () => {
+        this.server.init(this);
+      });
+    }
   }
 }
 
 const seatbelt = new Seatbelt();
 
-seatbelt.server.init();
+seatbelt.init();

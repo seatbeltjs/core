@@ -1,7 +1,5 @@
 import { Plugin } from '../../plugins';
 import { Decorator } from '../../helpers';
-export * from './request';
-export * from './response';
 
 export interface IRouteConfig {
   type: string|string[];
@@ -13,8 +11,28 @@ export namespace Route {
   export type RouteConstructor = new () => {
     controller: Function;
   };
-  export interface BaseRoute {
-    controller: Function;
+
+  export namespace Response {
+    export interface BaseInterface {
+      send: (status: number, body: Object) => any;
+      ok: (body: Object) => any;
+      created: (body: Object) => any;
+      badRequest: (body: Object) => any;
+      unauthorized: (body: Object) => any;
+      forbidden: (body: Object) => any;
+      notFound: (body: Object) => any;
+      serverError: (body: Object) => any;
+    }
+  }
+
+  export namespace Request {
+    export interface BaseInterface {
+      allParams: Object;
+    }
+  }
+
+  export interface BaseInterface {
+    controller: (req: Request.BaseInterface, res: Response.BaseInterface, server?: Object) => any;
   }
 
   export function Register(config: IRouteConfig): Decorator.ClassDecorator {

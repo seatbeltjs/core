@@ -8,6 +8,14 @@ class TSImportCreator {
         this.log = new _1.Log('Seatbelt-TSImportCreator');
         this.appPath = path;
     }
+    init() {
+        this.log.system('creating ts importer');
+        const files = scanFolder(this.appPath, 'ts', true).filter((path) => path.indexOf('/.seatbelt/') === -1);
+        this.log.system('files found', files);
+        this._createPath();
+        this._createImportsTS(files);
+        this._createServerTS(files);
+    }
     _createRollupConfig() {
         const rollupConfigPath = path_1.join(this.seatbeltPath, 'rollupconfig.js');
         const rollupTemplate = fs_1.readFileSync(path_1.join(__dirname, 'rollup.js.template'));
@@ -22,28 +30,26 @@ class TSImportCreator {
     }
     _createImportsTS(files) {
         this.seatbeltPath = path_1.join(this.appPath, '.seatbelt');
-        let exportTemplate = '';
+        let importsTemplate = '';
+        let importsTemplateBottom = '\nexport const allImports = {';
         files.forEach((file, i) => {
             file = file.slice(0, -3);
-            exportTemplate += `export * from '${file}';\n`;
+            importsTemplate += `import * as File${i} from '${file}';\n`;
+            importsTemplateBottom += `\n  File${i}`;
+            if (files[i + 1]) {
+                importsTemplateBottom += ',';
+            }
         });
-        fs_1.writeFileSync(path_1.join(this.seatbeltPath, 'imports.ts'), exportTemplate);
+        importsTemplateBottom += '\n};';
+        fs_1.writeFileSync(path_1.join(this.seatbeltPath, 'imports.ts'), importsTemplate + importsTemplateBottom);
     }
     ;
     _createServerTS(files) {
         this.writePath = path_1.join(this.seatbeltPath, 'index.ts');
         let template = fs_1.readFileSync(path_1.join(__dirname, 'boot.ts.template'));
-        this.log.system('writing to path', this.writePath, '' + template.length);
+        this.log.system('writing server template to path', this.writePath, '' + template.length);
         fs_1.writeFileSync(this.writePath, template);
         this._createRollupConfig();
-    }
-    init() {
-        this.log.system('creating ts importer');
-        const files = scanFolder(this.appPath, 'ts', true).filter((path) => path.indexOf('/.seatbelt/') === -1);
-        this.log.system('files found', files);
-        this._createPath();
-        this._createImportsTS(files);
-        this._createServerTS(files);
     }
 }
 exports.TSImportCreator = TSImportCreator;

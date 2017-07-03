@@ -1,24 +1,24 @@
+import { Route } from '../../';
 import { Plugin } from '../plugin';
 import { Decorator } from '../../helpers';
-import { Request, Response } from '../../';
 export declare namespace ServerPlugin {
-    type Init = () => any;
-    type Config = (routes: any[]) => any;
-    interface BaseServer extends Plugin.BasePlugin {
+    type Init = (seatbelt: any) => any;
+    type Config = (seatbelt: any, cb: Function) => any;
+    interface BaseInterface extends Plugin.BaseInterface {
         port: number;
         server: Object;
         conformServerControllerToSeatbeltController: Function;
     }
-    interface RouteConfig {
+    interface RouteConfigInterface {
         type: string[];
         path: string[];
     }
-    interface Route {
-        __routeConfig: RouteConfig;
-        controller: (request: Request.Base, response: Response.Base, server: Object) => any;
+    interface RouteInterface {
+        __routeConfig: RouteConfigInterface;
+        controller: (request: Route.Request.BaseInterface, response: Route.Response.BaseInterface, server: Object) => any;
     }
-    interface PluginConfig {
+    interface PluginConfigInterface {
         name: string;
     }
-    function Register(config: PluginConfig): Decorator.ClassDecorator;
+    function Register(config: PluginConfigInterface): Decorator.ClassDecorator;
 }

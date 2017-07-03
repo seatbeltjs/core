@@ -2,19 +2,19 @@ import { Log } from '../../';
 import { Decorator } from '../../helpers';
 
 export namespace ConfigPlugin {
-  export declare type Init = () => any;
-  export declare type Config = (seatbelt: any) => any;
+  export declare type Init = (seatbelt: any) => any;
+  export declare type Config = (seatbelt: any, cb: Function) => any;
 
-  export interface BasePlugin {
+  export interface BaseInterface {
     init?: Init;
     config?: Config;
   }
 
-  export interface PluginConfig {
+  export interface PluginConfigInterface {
     name: string;
   }
 
-  export function Register(config: PluginConfig): Decorator.ClassDecorator {
+  export function Register(config: PluginConfigInterface): Decorator.ClassDecorator {
     return function (OriginalClassConstructor: Decorator.ClassConstructor): any {
 
       class PluginConfigRegister extends OriginalClassConstructor {
