@@ -27,7 +27,7 @@ export namespace Service {
       delete target[key];
 
       Object.defineProperty(target, key, {
-        get: function() { return __allServices[name.toLowerCase()]; },
+        get() { return __allServices[name.toLowerCase()]; },
         enumerable: true,
         configurable: true
       });

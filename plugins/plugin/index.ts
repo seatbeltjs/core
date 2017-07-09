@@ -14,7 +14,7 @@ export namespace Plugin {
     name: string;
   }
 
-  export function Register(config: PluginConfigInterface): Decorator.ClassDecorator {
+  export function Register (config: PluginConfigInterface): Decorator.ClassDecorator {
     return function (OriginalClassConstructor: Decorator.ClassConstructor): any {
 
       class PluginRegister extends OriginalClassConstructor {

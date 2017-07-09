@@ -20,10 +20,8 @@
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-node-resolve": "~2.0.0",
     "rollup-plugin-typescript": "^0.8.1",
-    "tslint": "^4.5.1",
-    "tslint-eslint-rules": "^3.5.0",
-    "tslint-microsoft-contrib": "^4.0.1",
-    "typescript": "^2.3.2"
+    "tslint": "^5.5.0",
+    "typescript": "^2.4.1"
   },
   "dependencies": {
     "@types/chalk": "^0.4.31",

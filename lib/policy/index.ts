@@ -30,7 +30,7 @@ export namespace Policy {
   }
 
   export function Register(): Decorator.ClassDecorator {
-    return (OriginalClassConstructor: Decorator.ClassConstructor&Route.RouteConstructor): any => {
+    return (OriginalClassConstructor: Decorator.ClassConstructor): any => {
       @Plugin.Register({
         name: 'policy'
       })

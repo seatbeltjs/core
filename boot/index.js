@@ -47,7 +47,6 @@ class Seatbelt {
             this._bootApp();
         });
     }
-    ;
     _setRoot(root) {
         this._root = root;
     }

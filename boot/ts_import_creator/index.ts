@@ -50,11 +50,11 @@ export class TSImportCreator {
     });
     importsTemplateBottom += '\n};';
     writeFileSync(join(this.seatbeltPath, 'imports.ts'), importsTemplate + importsTemplateBottom);
-  };
+  }
 
   private _createServerTS(files: string[]) {
     this.writePath = join(this.seatbeltPath, 'index.ts');
-    let template = readFileSync(join(__dirname, 'boot.ts.template'));
+    const template = readFileSync(join(__dirname, 'boot.ts.template'));
 
     this.log.system('writing server template to path', this.writePath, '' + template.length);
     writeFileSync(this.writePath, template);

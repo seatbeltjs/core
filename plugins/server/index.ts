@@ -30,7 +30,7 @@ export namespace ServerPlugin {
     name: string;
   }
 
-  export function Register(config: PluginConfigInterface): Decorator.ClassDecorator {
+  export function Register (config: PluginConfigInterface): Decorator.ClassDecorator {
     return function (OriginalClassConstructor: Decorator.ClassConstructor): any {
 
       class ServerRegister extends OriginalClassConstructor {

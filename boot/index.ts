@@ -51,7 +51,7 @@ export class Seatbelt implements ISeatbelt {
     this._rollUpFiles(() => {
       this._bootApp();
     });
-  };
+  }
 
   public strap = this.init;
 

@@ -13,7 +13,7 @@ class Seatbelt {
       this.runPluginConfigs(() => {
         this.configureServerAndBootServer();
       });
-    }
+    };
 
     // iterates all files exported by the entire application and sorts them by plugin type
     this.initializedAllPluginTypes = () => {
@@ -32,7 +32,7 @@ class Seatbelt {
           }
         });
       }
-    }
+    };
 
     this.initPlugin = (SeatbeltPluginClassOrObject) => {
       let initializedPlugin;
@@ -54,13 +54,13 @@ class Seatbelt {
           this.plugins[initializedPlugin.__seatbeltPluginName].push(initializedPlugin);
         }
       }
-    }
+    };
 
     this.throwErrorIfNoServerDeclared = () => {
       if (!this.server) {
-        throw new Error('failed to initialize server, did you forget to export one?')
+        throw new Error('failed to initialize server, did you forget to export one?');
       }
-    }
+    };
 
     this.runPluginConfigs = (cb) => {
       const recursivePluginConfig = (pluginNames) => {
@@ -73,15 +73,15 @@ class Seatbelt {
             }
           });
         }
-      }
+      };
       recursivePluginConfig(this.pluginConfigNames);
-    }
+    };
 
     this.configureServerAndBootServer = () => {
       this.server.config(this, () => {
         this.server.init(this);
       });
-    }
+    };
   }
 }
 

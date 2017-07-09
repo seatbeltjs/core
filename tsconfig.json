@@ -10,15 +10,8 @@
     "inlineSources": false,
     "noImplicitUseStrict": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "types": [
-      "node"
-    ]
+    "allowSyntheticDefaultImports": true
   },
-  "include": [
-    "index.ts",
-    "**/*.ts"
-  ],
   "exclude": [
     "node_modules"
   ],

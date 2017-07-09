@@ -35,8 +35,8 @@ export namespace Route {
     controller: (req: Request.BaseInterface, res: Response.BaseInterface, server?: Object) => any;
   }
 
-  export function Register(config: IRouteConfig): Decorator.ClassDecorator {
-    return function(OriginalClassConstructor: Decorator.ClassConstructor) {
+    export function Register(config: IRouteConfig): Decorator.ClassDecorator {
+      return function(OriginalClassConstructor: Decorator.ClassConstructor) {
 
       if (typeof config.type === 'string') {
         config.type = [config.type];

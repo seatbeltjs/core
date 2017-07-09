@@ -43,10 +43,9 @@ class TSImportCreator {
         importsTemplateBottom += '\n};';
         fs_1.writeFileSync(path_1.join(this.seatbeltPath, 'imports.ts'), importsTemplate + importsTemplateBottom);
     }
-    ;
     _createServerTS(files) {
         this.writePath = path_1.join(this.seatbeltPath, 'index.ts');
-        let template = fs_1.readFileSync(path_1.join(__dirname, 'boot.ts.template'));
+        const template = fs_1.readFileSync(path_1.join(__dirname, 'boot.ts.template'));
         this.log.system('writing server template to path', this.writePath, '' + template.length);
         fs_1.writeFileSync(this.writePath, template);
         this._createRollupConfig();
